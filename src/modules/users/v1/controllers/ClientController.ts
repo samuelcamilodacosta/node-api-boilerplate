@@ -15,22 +15,22 @@ import { EnumEndpoints } from '../../../../models';
 import { RouteResponse } from '../../../../routes';
 
 // Entities
-import { User } from '../../../../library/database/entity';
+import { Client } from '../../../../library/database/entity';
 
 // Repositories
-import { UserRepository } from '../../../../library/database/repository';
+import { ClientRepository } from '../../../../library/database/repository';
 
 // Validators
-import { UserValidator } from '../middlewares/UserValidator';
+import { ClientValidator } from '../middlewares/ClientValidator';
 
-@Controller(EnumEndpoints.USER_V1)
-export class UserController extends BaseController {
+@Controller(EnumEndpoints.CLIENT)
+export class ClientController extends BaseController {
     /**
      * @swagger
-     * /v1/user:
+     * /clients:
      *   get:
-     *     summary: Lista os usuários
-     *     tags: [Users]
+     *     summary: Mostra todos os clientes.
+     *     tags: [Clients]
      *     consumes:
      *       - application/json
      *     produces:
@@ -45,25 +45,24 @@ export class UserController extends BaseController {
      */
     @Get()
     @PublicRoute()
-    public async get(req: Request, res: Response): Promise<void> {
-        const [rows, count] = await new UserRepository().list<User>(UserController.listParams(req));
-
+    public async getAll(req: Request, res: Response): Promise<void> {
+        const [rows, count] = await new ClientRepository().list<Client>(ClientController.listParams(req));
         RouteResponse.success({ rows, count }, res);
     }
 
     /**
      * @swagger
-     * /v1/user/{userId}:
+     * /clients/{clientId}:
      *   get:
-     *     summary: Retorna informações de um usuário
-     *     tags: [Users]
+     *     summary: Retorna informações de um cliente.
+     *     tags: [Clients]
      *     consumes:
      *       - application/json
      *     produces:
      *       - application/json
      *     parameters:
      *       - in: path
-     *         name: userId
+     *         name: clientId
      *         schema:
      *           type: string
      *         required: true
@@ -72,17 +71,17 @@ export class UserController extends BaseController {
      */
     @Get('/:id')
     @PublicRoute()
-    @Middlewares(UserValidator.onlyId())
+    @Middlewares(ClientValidator.onlyId())
     public async getOne(req: Request, res: Response): Promise<void> {
-        RouteResponse.success({ ...req.body.userRef }, res);
+        RouteResponse.success({ ...req.body.clientRef }, res);
     }
 
     /**
      * @swagger
-     * /v1/user:
+     * /clients:
      *   post:
-     *     summary: Cadastra um usuário
-     *     tags: [Users]
+     *     summary: Cadastra um cliente
+     *     tags: [Clients]
      *     consumes:
      *       - application/json
      *     produces:
@@ -93,34 +92,47 @@ export class UserController extends BaseController {
      *           schema:
      *             type: object
      *             example:
-     *               name: userName
+     *               name: clientName
+     *               email: me@email.com
+     *               phone: (34) 99999-9999
+     *               status: true
+     *               invalidField: should be ignored
      *             required:
      *               - name
+     *               - email
+     *               - phone
      *             properties:
      *               name:
      *                 type: string
+     *               email:
+     *                 type: string
+     *               phone:
+     *                 type: string
+     *               status:
+     *                 type: boolean
      *     responses:
      *       $ref: '#/components/responses/baseCreate'
      */
     @Post()
     @PublicRoute()
-    @Middlewares(UserValidator.post())
+    @Middlewares(ClientValidator.post())
     public async add(req: Request, res: Response): Promise<void> {
-        const newUser: DeepPartial<User> = {
-            name: req.body.name
+        const newClient: DeepPartial<Client> = {
+            name: req.body.name,
+            email: req.body.email,
+            phone: req.body.phone,
+            status: true
         };
-
-        await new UserRepository().insert(newUser);
-
+        await new ClientRepository().insert(newClient);
         RouteResponse.successCreate(res);
     }
 
     /**
      * @swagger
-     * /v1/user:
+     * /clients:
      *   put:
-     *     summary: Altera um usuário
-     *     tags: [Users]
+     *     summary: Altera dados de um cliente
+     *     tags: [Clients]
      *     consumes:
      *       - application/json
      *     produces:
@@ -131,45 +143,49 @@ export class UserController extends BaseController {
      *           schema:
      *             type: object
      *             example:
-     *               id: userId
-     *               name: userName
+     *               id: clientId
+     *               name: newName
      *             required:
      *               - id
-     *               - name
      *             properties:
-     *               id:
-     *                 type: string
      *               name:
      *                 type: string
+     *               email:
+     *                 type: string
+     *               phone:
+     *                 type: string
+     *               status:
+     *                 type: boolean
+     *
      *     responses:
      *       $ref: '#/components/responses/baseEmpty'
      */
     @Put()
     @PublicRoute()
-    @Middlewares(UserValidator.put())
+    @Middlewares(ClientValidator.put())
     public async update(req: Request, res: Response): Promise<void> {
-        const user: User = req.body.userRef;
-
-        user.name = req.body.name;
-
-        await new UserRepository().update(user);
-
+        const client: Client = req.body.clientRef;
+        client.name = req.body.name;
+        client.email = req.body.email;
+        client.phone = req.body.phone;
+        client.status = req.body.status;
+        await new ClientRepository().update(client);
         RouteResponse.successEmpty(res);
     }
 
     /**
      * @swagger
-     * /v1/user/{userId}:
+     * /clients/{clientId}:
      *   delete:
-     *     summary: Apaga um usuário definitivamente
-     *     tags: [Users]
+     *     summary: Apaga um cliente definitivamente
+     *     tags: [Clients]
      *     consumes:
      *       - application/json
      *     produces:
      *       - application/json
      *     parameters:
      *       - in: path
-     *         name: userId
+     *         name: clientId
      *         schema:
      *           type: string
      *         required: true
@@ -178,12 +194,10 @@ export class UserController extends BaseController {
      */
     @Delete('/:id')
     @PublicRoute()
-    @Middlewares(UserValidator.onlyId())
+    @Middlewares(ClientValidator.onlyId())
     public async remove(req: Request, res: Response): Promise<void> {
         const { id } = req.params;
-
-        await new UserRepository().delete(id);
-
+        await new ClientRepository().delete(id);
         RouteResponse.success({ id }, res);
     }
 }
