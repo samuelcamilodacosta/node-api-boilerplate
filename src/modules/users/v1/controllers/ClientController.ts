@@ -145,8 +145,14 @@ export class ClientController extends BaseController {
      *             example:
      *               id: clientId
      *               name: newName
+     *               email: newEmail
+     *               phone: newPhone
+     *               status: boolean
      *             required:
      *               - id
+     *               - name
+     *               - email
+     *               - phone
      *             properties:
      *               name:
      *                 type: string

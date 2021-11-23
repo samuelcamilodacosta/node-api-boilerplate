@@ -1,0 +1,108 @@
+{
+	"info": {
+		"_postman_id": "bd1ee026-3313-4437-af26-3c0157a490db",
+		"name": "Clients",
+		"description": "Documentação Postman relacionada a API do CRUD Clients.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Mostrar todos clientes cadastrados",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{server}}clients",
+					"host": [
+						"{{server}}clients"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Cadastrar um novo cliente",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"name\": \"myName\",\n  \"email\": \"me@email.com\",\n  \"phone\": \"(34) 99999-9999\",\n  \"status\": true\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{server}}clients",
+					"host": [
+						"{{server}}clients"
+					]
+				},
+				"description": "O parâmetro status é opcional"
+			},
+			"response": []
+		},
+		{
+			"name": "Alterar dados de um cliente",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"id\": \"1\",\n  \"name\": \"Bruno\",\n  \"email\": \"me@meuemail.com\",\n  \"phone\": \"(34) 99999-8888\",\n  \"status\": true\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{server}}clients",
+					"host": [
+						"{{server}}clients"
+					]
+				},
+				"description": "O parâmetro status é opcional"
+			},
+			"response": []
+		},
+		{
+			"name": "Buscar informações de um cliente pelo id",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{server}}clients/{{id_example}}",
+					"host": [
+						"{{server}}clients"
+					],
+					"path": [
+						"{{id_example}}"
+					]
+				},
+				"description": "id_example foi uma variável global criada para exemplo, onde possui o valor 1"
+			},
+			"response": []
+		},
+		{
+			"name": "Apaga um cliente definitivamente",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{server}}clients/{{id_example}}",
+					"host": [
+						"{{server}}clients"
+					],
+					"path": [
+						"{{id_example}}"
+					]
+				},
+				"description": "id_example foi uma variável global criada para exemplo, onde possui o valor 1"
+			},
+			"response": []
+		}
+	]
+}
