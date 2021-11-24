@@ -1,11 +1,11 @@
-import { Entity, ObjectID, PrimaryGeneratedColumn, Column, BeforeInsert, BeforeUpdate, BaseEntity } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, UpdateDateColumn, CreateDateColumn, BaseEntity } from 'typeorm';
 
 @Entity()
 export class Client extends BaseEntity {
     @PrimaryGeneratedColumn() // Alterar para @PrimaryGeneratedColumn em caso de banco diferente do MongoDB
-    public id: ObjectID;
+    public id: number;
 
-    @Column({ unique: true })
+    @Column()
     public name: string;
 
     @Column({ unique: true })
@@ -17,20 +17,9 @@ export class Client extends BaseEntity {
     @Column()
     public status: boolean;
 
-    @Column()
+    @CreateDateColumn()
     public createdAt: Date;
 
-    @Column()
+    @UpdateDateColumn()
     public updatedAt: Date;
-
-    @BeforeInsert()
-    public setCreateDate(): void {
-        this.createdAt = new Date();
-    }
-
-    @BeforeInsert()
-    @BeforeUpdate()
-    public setUpdateDate(): void {
-        this.updatedAt = new Date();
-    }
 }

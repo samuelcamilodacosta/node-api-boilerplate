@@ -20,7 +20,7 @@ export class BaseValidator {
     /**
      * validators
      *
-     * Schema base para validação no controller
+     * Schema base para validação
      */
     protected static validators: Record<string, ParamSchema> | any = {
         id: (repository: BaseRepository): ParamSchema => {
@@ -63,7 +63,7 @@ export class BaseValidator {
         email: {
             in: 'body',
             isEmail: true,
-            errorMessage: 'email invalido'
+            errorMessage: 'Email inválido'
         },
         phone: {
             in: 'body',
@@ -71,20 +71,15 @@ export class BaseValidator {
             matches: {
                 options: [/^\([1-9]{2}\) (?:[2-8]|9[1-9])[0-9]{3}-[0-9]{4}$/]
             },
-            errorMessage: 'telefone invalido'
+            errorMessage: 'Telefone inválido'
         },
         status: {
             in: 'body',
             isBoolean: true,
             optional: true,
-            errorMessage: 'status invalido'
+            errorMessage: 'Status inválido'
         }
     };
-
-    private static validPhone(phone: string): boolean {
-        const regex = new RegExp('^\\([0-9]{2}\\)((3[0-9]{3}-[0-9]{4})|(9[0-9]{3}-[0-9]{5}))$');
-        return regex.test(phone);
-    }
 
     /**
      * validationList

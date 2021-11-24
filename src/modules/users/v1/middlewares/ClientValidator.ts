@@ -23,25 +23,19 @@ export class ClientValidator extends BaseValidator {
      * Schema para validação no controller de clientes
      */
     private static model: Schema = {
-        name: BaseValidator.validators.name,
-        email: BaseValidator.validators.email,
-        phone: BaseValidator.validators.phone,
-        status: BaseValidator.validators.status,
+        name: ClientValidator.validators.name,
+        email: ClientValidator.validators.email,
+        phone: ClientValidator.validators.phone,
+        status: ClientValidator.validators.status,
         id: {
-            ...BaseValidator.validators.id(new ClientRepository()),
+            ...ClientValidator.validators.id(new ClientRepository()),
             errorMessage: 'Cliente não encontrado'
         },
         duplicate: {
-            errorMessage: 'Cliente já existente',
+            errorMessage: 'Email já cadastrado',
             custom: {
                 options: async (_: string, { req }) => {
                     let check = false;
-
-                    if (req.body.name) {
-                        const clientRepository: ClientRepository = new ClientRepository();
-                        const user: Client | undefined = await clientRepository.findByName(req.body.name);
-                        check = user ? req.body.id === user.id.toString() : true;
-                    }
 
                     if (req.body.email) {
                         const clientRepository: ClientRepository = new ClientRepository();
@@ -61,13 +55,9 @@ export class ClientValidator extends BaseValidator {
      * @returns Lista de validadores
      */
     public static post(): RequestHandler[] {
-        return ClientValidator.validationList({
-            name: ClientValidator.model.name,
-            email: ClientValidator.model.email,
-            phone: ClientValidator.model.phone,
-            status: ClientValidator.model.status,
-            duplicate: ClientValidator.model.duplicate
-        });
+        const dataClient = { ...ClientValidator.model };
+        delete dataClient.id;
+        return ClientValidator.validationList({ ...dataClient });
     }
 
     /**

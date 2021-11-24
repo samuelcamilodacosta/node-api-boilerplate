@@ -202,8 +202,7 @@ export class ClientController extends BaseController {
     @PublicRoute()
     @Middlewares(ClientValidator.onlyId())
     public async remove(req: Request, res: Response): Promise<void> {
-        const { id } = req.params;
-        await new ClientRepository().delete(id);
-        RouteResponse.success({ id }, res);
+        await new ClientRepository().delete(req.params.id);
+        RouteResponse.success(req.params.id, res);
     }
 }

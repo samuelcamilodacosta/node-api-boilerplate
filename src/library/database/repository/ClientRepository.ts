@@ -23,7 +23,7 @@ export class ClientRepository extends BaseRepository {
      *
      * Adiciona um novo cliente no BD
      *
-     * @param client - Dados do cliente
+     * @param {DeepPartial} client - Dados do cliente
      *
      * @returns Cliente adicionado
      */
@@ -68,18 +68,5 @@ export class ClientRepository extends BaseRepository {
      */
     public findByEmail(email: string): Promise<Client | undefined> {
         return this.getConnection().getRepository(Client).findOne({ email });
-    }
-
-    /**
-     * findByName
-     *
-     * Busca um cliente pelo nome na lista de clientes
-     *
-     * @param name - Nome do cliente
-     *
-     * @returns Cliente encontrado
-     */
-    public findByName(name: string): Promise<Client | undefined> {
-        return this.getConnection().getRepository(Client).findOne({ name });
     }
 }
