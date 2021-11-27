@@ -62,11 +62,6 @@ export class UserController extends BaseController {
     @PublicRoute()
     @Middlewares(UserValidator.login())
     public async login(req: Request, res: Response): Promise<void> {
-        const infoUser: DeepPartial<User> = {
-            email: req.body.email,
-            password: req.body.password
-        };
-
         const user = await new UserRepository().findByEmail(req.body.email);
 
         if (!user) {
@@ -74,9 +69,9 @@ export class UserController extends BaseController {
         }
 
         const token = jwt.sign({ id: user.id, email: user.email }, 'secret', { expiresIn: '10h' });
-
         const isValidPassword = await bcrypt.compare(req.body.password, user.password);
-        if (user.email === infoUser.email && isValidPassword === true) {
+
+        if (isValidPassword) {
             return RouteResponse.success(token, res);
         }
         return RouteResponse.unauthorizedError(res, 'Erro ao tentar logar');
