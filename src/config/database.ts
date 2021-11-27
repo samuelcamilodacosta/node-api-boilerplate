@@ -34,5 +34,5 @@ const mongoOptions: MongoConnectionOptions = {
 
 export const dbConfig = {
     ...baseOptions,
-    ...mongoOptions
+    ...mysqlOptions
 } as ConnectionOptions;

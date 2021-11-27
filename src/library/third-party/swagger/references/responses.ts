@@ -88,6 +88,8 @@
  *     baseResponse:
  *       '200':
  *         $ref: '#/components/responses/200'
+ *       '204':
+ *         $ref: '#/components/responses/204'
  *       '400':
  *         $ref: '#/components/responses/400'
  *       '401':

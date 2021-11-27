@@ -37,7 +37,7 @@ export class RouteResponse {
     /**
      * successEmpty
      *
-     * Retorna sucesso sem mensagem de resposta - 204
+     * Retorna sucesso sem mensagem de resposta para o login - 204
      *
      * @param res - Resposta da requisição
      */

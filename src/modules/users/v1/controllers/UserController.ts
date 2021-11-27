@@ -1,12 +1,16 @@
 // Modules
 import { DeepPartial } from 'typeorm';
 import { Request, Response } from 'express';
+import bcrypt from 'bcryptjs';
+
+// JWT
+import jwt from 'jsonwebtoken';
 
 // Library
 import { BaseController } from '../../../../library';
 
 // Decorators
-import { Controller, Delete, Get, Middlewares, Post, PublicRoute, Put } from '../../../../decorators';
+import { Controller, Delete, Middlewares, Post, PublicRoute, Put } from '../../../../decorators';
 
 // Models
 import { EnumEndpoints } from '../../../../models';
@@ -27,61 +31,9 @@ import { UserValidator } from '../middlewares/UserValidator';
 export class UserController extends BaseController {
     /**
      * @swagger
-     * /v1/user:
-     *   get:
-     *     summary: Lista os usuários
-     *     tags: [Users]
-     *     consumes:
-     *       - application/json
-     *     produces:
-     *       - application/json
-     *     parameters:
-     *       - $ref: '#/components/parameters/listPageRef'
-     *       - $ref: '#/components/parameters/listSizeRef'
-     *       - $ref: '#/components/parameters/listOrderRef'
-     *       - $ref: '#/components/parameters/listOrderByRef'
-     *     responses:
-     *       $ref: '#/components/responses/baseResponse'
-     */
-    @Get()
-    @PublicRoute()
-    public async get(req: Request, res: Response): Promise<void> {
-        const [rows, count] = await new UserRepository().list<User>(UserController.listParams(req));
-
-        RouteResponse.success({ rows, count }, res);
-    }
-
-    /**
-     * @swagger
-     * /v1/user/{userId}:
-     *   get:
-     *     summary: Retorna informações de um usuário
-     *     tags: [Users]
-     *     consumes:
-     *       - application/json
-     *     produces:
-     *       - application/json
-     *     parameters:
-     *       - in: path
-     *         name: userId
-     *         schema:
-     *           type: string
-     *         required: true
-     *     responses:
-     *       $ref: '#/components/responses/baseResponse'
-     */
-    @Get('/:id')
-    @PublicRoute()
-    @Middlewares(UserValidator.onlyId())
-    public async getOne(req: Request, res: Response): Promise<void> {
-        RouteResponse.success({ ...req.body.userRef }, res);
-    }
-
-    /**
-     * @swagger
-     * /v1/user:
+     * /v1/user/login:
      *   post:
-     *     summary: Cadastra um usuário
+     *     summary: Permite ou não o login do usuário
      *     tags: [Users]
      *     consumes:
      *       - application/json
@@ -93,11 +45,68 @@ export class UserController extends BaseController {
      *           schema:
      *             type: object
      *             example:
-     *               name: userName
+     *               email: me@mail.com
+     *               password: yourPassword
      *             required:
-     *               - name
+     *               - email
+     *               - password
      *             properties:
-     *               name:
+     *               email:
+     *                 type: string
+     *               password:
+     *                 type: string
+     *     responses:
+     *       $ref: '#/components/responses/baseResponse'
+     */
+    @Post('/login')
+    @PublicRoute()
+    @Middlewares(UserValidator.login())
+    public async login(req: Request, res: Response): Promise<void> {
+        const infoUser: DeepPartial<User> = {
+            email: req.body.email,
+            password: req.body.password
+        };
+
+        const user = await new UserRepository().findByEmail(req.body.email);
+
+        if (!user) {
+            return RouteResponse.unauthorizedError(res, 'Erro ao tentar logar');
+        }
+
+        const token = jwt.sign({ id: user.id, email: user.email }, 'secret', { expiresIn: '10h' });
+
+        const isValidPassword = await bcrypt.compare(req.body.password, user.password);
+        if (user.email === infoUser.email && isValidPassword === true) {
+            return RouteResponse.success(token, res);
+        }
+        return RouteResponse.unauthorizedError(res, 'Erro ao tentar logar');
+    }
+
+    /**
+     * @swagger
+     * /v1/user:
+     *   post:
+     *     summary: Cadastra um usuário (responsável).
+     *     tags: [Users]
+     *     consumes:
+     *       - application/json
+     *     produces:
+     *       - application/json
+     *     requestBody:
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             example:
+     *               email: me@mail.com
+     *               password: yourPassword
+     *             required:
+     *               - email
+     *               - password
+     *             properties:
+     *               email:
+     *                 type: string
+     *               password:
      *                 type: string
      *     responses:
      *       $ref: '#/components/responses/baseCreate'
@@ -107,7 +116,8 @@ export class UserController extends BaseController {
     @Middlewares(UserValidator.post())
     public async add(req: Request, res: Response): Promise<void> {
         const newUser: DeepPartial<User> = {
-            name: req.body.name
+            email: req.body.email,
+            password: req.body.password
         };
 
         await new UserRepository().insert(newUser);
@@ -119,7 +129,7 @@ export class UserController extends BaseController {
      * @swagger
      * /v1/user:
      *   put:
-     *     summary: Altera um usuário
+     *     summary: Altera um usuário (responsável)
      *     tags: [Users]
      *     consumes:
      *       - application/json
@@ -132,14 +142,18 @@ export class UserController extends BaseController {
      *             type: object
      *             example:
      *               id: userId
-     *               name: userName
+     *               email: me@mail.com
+     *               password: userPassword
      *             required:
      *               - id
-     *               - name
+     *               - email
+     *               - password
      *             properties:
      *               id:
      *                 type: string
-     *               name:
+     *               email:
+     *                 type: string
+     *               password:
      *                 type: string
      *     responses:
      *       $ref: '#/components/responses/baseEmpty'
@@ -150,7 +164,8 @@ export class UserController extends BaseController {
     public async update(req: Request, res: Response): Promise<void> {
         const user: User = req.body.userRef;
 
-        user.name = req.body.name;
+        user.email = req.body.email;
+        user.password = req.body.password;
 
         await new UserRepository().update(user);
 
@@ -161,7 +176,7 @@ export class UserController extends BaseController {
      * @swagger
      * /v1/user/{userId}:
      *   delete:
-     *     summary: Apaga um usuário definitivamente
+     *     summary: Apaga um usuário (responsável)
      *     tags: [Users]
      *     consumes:
      *       - application/json
@@ -180,10 +195,8 @@ export class UserController extends BaseController {
     @PublicRoute()
     @Middlewares(UserValidator.onlyId())
     public async remove(req: Request, res: Response): Promise<void> {
-        const { id } = req.params;
+        await new UserRepository().delete(req.params.id);
 
-        await new UserRepository().delete(id);
-
-        RouteResponse.success({ id }, res);
+        RouteResponse.success(req.params.id, res);
     }
 }
