@@ -1,6 +1,12 @@
 // Libraries
-import { RequestHandler } from 'express';
+import { RequestHandler, Request, Response } from 'express';
 import { Schema } from 'express-validator';
+
+// JWT
+import jwt from 'jsonwebtoken';
+
+// Routes
+import { RouteResponse } from '../../../../routes';
 
 // Repositories
 import { UserRepository } from '../../../../library/database/repository/UserRepository';
@@ -92,6 +98,22 @@ export class UserValidator extends BaseValidator {
             email: UserValidator.model.email,
             password: UserValidator.model.password
         });
+    }
+
+    public static authMiddleware(req: Request, res: Response): void {
+        const { authorization } = req.headers;
+
+        if (!authorization) {
+            return RouteResponse.unauthorizedError(res, 'Erro ao tentar logar');
+        }
+        const token = authorization.replace('Bearer', '').trim();
+
+        try {
+            const data = jwt.verify(token, 'secret');
+            return console.log(data);
+        } catch {
+            return RouteResponse.unauthorizedError(res, 'Erro ao tentar logar');
+        }
     }
 
     /**

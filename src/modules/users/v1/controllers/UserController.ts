@@ -87,6 +87,14 @@ export class UserController extends BaseController {
      *       - application/json
      *     produces:
      *       - application/json
+     *     components:
+     *       securitySchemes:
+     *         bearerAuth:
+     *           type: http
+     *           scheme: bearer
+     *           bearerFormat: JWT
+     *     security:
+     *       - bearerAuth: []
      *     requestBody:
      *       content:
      *         application/json:
@@ -108,7 +116,7 @@ export class UserController extends BaseController {
      */
     @Post()
     @PublicRoute()
-    @Middlewares(UserValidator.post())
+    @Middlewares(UserValidator.authMiddleware, UserValidator.post())
     public async add(req: Request, res: Response): Promise<void> {
         const newUser: DeepPartial<User> = {
             email: req.body.email,
