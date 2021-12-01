@@ -40,44 +40,6 @@ export class BaseValidator {
                 },
                 errorMessage: 'ID não encontrado'
             };
-        },
-        name: {
-            in: 'body',
-            isString: true,
-            isLength: {
-                options: {
-                    min: 3
-                }
-            },
-            customSanitizer: {
-                options: (value: string) => {
-                    if (typeof value === 'string') {
-                        return StringUtils.firstUpperCase(value);
-                    }
-
-                    return undefined;
-                }
-            },
-            errorMessage: 'Nome inválido'
-        },
-        email: {
-            in: 'body',
-            isEmail: true,
-            errorMessage: 'Email inválido'
-        },
-        phone: {
-            in: 'body',
-            isString: true,
-            matches: {
-                options: [/^\([1-9]{2}\) (?:[2-8]|9[1-9])[0-9]{3}-[0-9]{4}$/]
-            },
-            errorMessage: 'Telefone inválido'
-        },
-        status: {
-            in: 'body',
-            isBoolean: true,
-            optional: true,
-            errorMessage: 'Status inválido'
         }
     };
 
