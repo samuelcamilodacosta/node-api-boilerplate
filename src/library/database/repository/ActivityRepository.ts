@@ -70,4 +70,17 @@ export class ActivityRepository extends BaseRepository {
     public findByDescription(description: string): Promise<Activity | undefined> {
         return this.getConnection().getRepository(Activity).findOne({ description });
     }
+
+    /**
+     * findById
+     *
+     * Busca uma atividade pelo id
+     *
+     * @param id - ID da Atividade
+     *
+     * @returns Atividade procurada
+     */
+    public findById(id: number | undefined): Promise<Activity | undefined> {
+        return this.getConnection().getRepository(Activity).findOne(id);
+    }
 }

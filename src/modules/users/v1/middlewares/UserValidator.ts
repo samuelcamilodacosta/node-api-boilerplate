@@ -100,7 +100,7 @@ export class UserValidator extends BaseValidator {
         });
     }
 
-    public static authMiddleware(req: Request, res: Response): void {
+    public static authMiddleware(req: Request, res: Response): string | void | jwt.JwtPayload {
         const { authorization } = req.headers;
 
         if (!authorization) {
@@ -110,7 +110,7 @@ export class UserValidator extends BaseValidator {
 
         try {
             const data = jwt.verify(token, 'secret');
-            return console.log(data);
+            return data;
         } catch {
             return RouteResponse.unauthorizedError(res, 'Erro ao tentar logar');
         }
