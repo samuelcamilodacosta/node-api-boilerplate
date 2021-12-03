@@ -49,7 +49,7 @@ export class ListController extends BaseController {
      */
     @Get('/:id')
     @PublicRoute()
-    @Middlewares(AuthValidator.authMiddleware, ListValidator.onlyId())
+    @Middlewares(AuthValidator.accessPermission, ListValidator.onlyId())
     public async getListById(req: Request, res: Response): Promise<void> {
         RouteResponse.success({ ...req.body.listRef }, res);
     }
@@ -76,7 +76,7 @@ export class ListController extends BaseController {
      */
     @Get()
     @PublicRoute()
-    @Middlewares(AuthValidator.authMiddleware)
+    @Middlewares(AuthValidator.accessPermission)
     public async getAll(req: Request, res: Response): Promise<void> {
         const [rows, count] = await new ListRepository().list<List>(ListController.listParams(req));
         RouteResponse.success({ rows, count }, res);
@@ -127,7 +127,7 @@ export class ListController extends BaseController {
      */
     @Post()
     @PublicRoute()
-    @Middlewares(AuthValidator.authMiddleware, ListValidator.post())
+    @Middlewares(AuthValidator.accessPermission, ListValidator.post())
     public async add(req: Request, res: Response): Promise<void> {
         const newList: DeepPartial<List> = {
             familyMemberName: req.body.familyMemberName,
@@ -188,7 +188,7 @@ export class ListController extends BaseController {
      */
     @Put()
     @PublicRoute()
-    @Middlewares(AuthValidator.authMiddleware, ListValidator.put())
+    @Middlewares(AuthValidator.accessPermission, ListValidator.put())
     public async update(req: Request, res: Response): Promise<void> {
         const list: List = req.body.listRef;
 
@@ -226,7 +226,7 @@ export class ListController extends BaseController {
      */
     @Delete('/:id')
     @PublicRoute()
-    @Middlewares(AuthValidator.authMiddleware, ListValidator.onlyId())
+    @Middlewares(AuthValidator.accessPermission, ListValidator.onlyId())
     public async remove(req: Request, res: Response): Promise<void> {
         await new ListRepository().delete(req.params.id);
 

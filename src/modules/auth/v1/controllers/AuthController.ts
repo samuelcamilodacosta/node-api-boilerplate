@@ -95,7 +95,7 @@ export class AuthController extends BaseController {
      */
     @Get()
     @PublicRoute()
-    @Middlewares(AuthValidator.authMiddleware)
+    @Middlewares(AuthValidator.accessPermission)
     public async emailToken(req: Request, res: Response): Promise<void> {
         RouteResponse.success(AuthValidator.decodeTokenEmail(req, res), res);
     }

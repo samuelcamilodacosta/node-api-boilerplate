@@ -48,7 +48,7 @@ export class MemberController extends BaseController {
      */
     @Get()
     @PublicRoute()
-    @Middlewares(AuthValidator.authMiddleware)
+    @Middlewares(AuthValidator.accessPermission)
     public async getAll(req: Request, res: Response): Promise<void> {
         const [rows, count] = await new MemberRepository().list<Member>(MemberController.listParams(req));
         RouteResponse.success({ rows, count }, res);
@@ -91,7 +91,7 @@ export class MemberController extends BaseController {
      */
     @Post()
     @PublicRoute()
-    @Middlewares(AuthValidator.authMiddleware, MemberValidator.post())
+    @Middlewares(AuthValidator.accessPermission, MemberValidator.post())
     public async add(req: Request, res: Response): Promise<void> {
         const newUser: DeepPartial<Member> = {
             name: req.body.name,
@@ -145,7 +145,7 @@ export class MemberController extends BaseController {
      */
     @Put()
     @PublicRoute()
-    @Middlewares(AuthValidator.authMiddleware, MemberValidator.put())
+    @Middlewares(AuthValidator.accessPermission, MemberValidator.put())
     public async update(req: Request, res: Response): Promise<void> {
         const member: Member = req.body.memberRef;
 
@@ -181,7 +181,7 @@ export class MemberController extends BaseController {
      */
     @Delete('/:id')
     @PublicRoute()
-    @Middlewares(AuthValidator.authMiddleware, MemberValidator.onlyId())
+    @Middlewares(AuthValidator.accessPermission, MemberValidator.onlyId())
     public async remove(req: Request, res: Response): Promise<void> {
         await new MemberRepository().delete(req.params.id);
 

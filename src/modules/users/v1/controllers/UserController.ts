@@ -104,7 +104,7 @@ export class UserController extends BaseController {
      */
     @Put()
     @PublicRoute()
-    @Middlewares(UserValidator.put())
+    @Middlewares(AuthValidator.accessPermission, UserValidator.put())
     public async update(req: Request, res: Response): Promise<void> {
         const user: User = req.body.userRef;
 
@@ -133,7 +133,7 @@ export class UserController extends BaseController {
      */
     @Delete()
     @PublicRoute()
-    @Middlewares(AuthValidator.authMiddleware, UserValidator.onlyId())
+    @Middlewares(AuthValidator.accessPermission, UserValidator.onlyId())
     public async remove(req: Request, res: Response): Promise<void> {
         const id = AuthValidator.decodeTokenId(req, res);
         if (id) {

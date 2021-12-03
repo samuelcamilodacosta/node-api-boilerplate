@@ -48,7 +48,7 @@ export class ActivityController extends BaseController {
      */
     @Get()
     @PublicRoute()
-    @Middlewares(AuthValidator.authMiddleware)
+    @Middlewares(AuthValidator.accessPermission)
     public async getAll(req: Request, res: Response): Promise<void> {
         const [rows, count] = await new ActivityRepository().list<Activity>(ActivityController.listParams(req));
         RouteResponse.success({ rows, count }, res);
@@ -83,7 +83,7 @@ export class ActivityController extends BaseController {
      */
     @Post()
     @PublicRoute()
-    @Middlewares(AuthValidator.authMiddleware, ActivityValidator.post())
+    @Middlewares(AuthValidator.accessPermission, ActivityValidator.post())
     public async add(req: Request, res: Response): Promise<void> {
         const newActivity: DeepPartial<Activity> = {
             description: req.body.description
@@ -127,7 +127,7 @@ export class ActivityController extends BaseController {
      */
     @Put()
     @PublicRoute()
-    @Middlewares(AuthValidator.authMiddleware, ActivityValidator.put())
+    @Middlewares(AuthValidator.accessPermission, ActivityValidator.put())
     public async update(req: Request, res: Response): Promise<void> {
         const activity: Activity = req.body.activityRef;
 
@@ -161,7 +161,7 @@ export class ActivityController extends BaseController {
      */
     @Delete('/:id')
     @PublicRoute()
-    @Middlewares(AuthValidator.authMiddleware, ActivityValidator.onlyId())
+    @Middlewares(AuthValidator.accessPermission, ActivityValidator.onlyId())
     public async remove(req: Request, res: Response): Promise<void> {
         await new ActivityRepository().delete(req.params.id);
 

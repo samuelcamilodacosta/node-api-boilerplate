@@ -7,6 +7,12 @@ import jwt from 'jsonwebtoken';
 import { UserValidator } from '../../../users/v1/middlewares/UserValidator';
 import { BaseValidator } from '../../../../library';
 
+// Repositories
+import { UserRepository } from '../../../../library/database/repository/UserRepository';
+
+// Entities
+import { User } from '../../../../library/database/entity';
+
 // Routes
 import { RouteResponse } from '../../../../routes';
 
@@ -16,25 +22,29 @@ import { ITokenPayload } from '../../../../models';
 /**
  * AuthValidator
  *
- * Classe de validação que autentica token de acesso
+ * Classe de validação e autenticação do token e do acesso
  */
 export class AuthValidator extends BaseValidator {
-    public static authMiddleware(req: Request, res: Response, next: NextFunction): void {
+    /**
+     * tokenValidate
+     *
+     * @returns Faz validação do token
+     */
+    public static tokenValidate(req: Request, res: Response, next: NextFunction): void {
         const { authorization } = req.headers;
 
         if (!authorization) {
-            RouteResponse.unauthorizedError(res, 'Erro ao tentar logar');
+            RouteResponse.unauthorizedError(res);
         } else {
-            const token = authorization.replace('Bearer', '').trim();
-
             try {
+                const token = authorization.replace('Bearer', '').trim();
                 const data = jwt.verify(token, 'secret');
                 const { id, email } = data as ITokenPayload;
                 req.userId = id;
                 req.userEmail = email;
                 next();
             } catch {
-                RouteResponse.unauthorizedError(res, 'Erro ao tentar logar');
+                RouteResponse.unauthorizedError(res);
             }
         }
     }
@@ -77,6 +87,22 @@ export class AuthValidator extends BaseValidator {
             return id;
         }
         return undefined;
+    }
+
+    /**
+     * acessPermission
+     *
+     * @returns Verifica se o usuário tem permissão de acesso.
+     */
+    public static async accessPermission(req: Request, res: Response, next: NextFunction): Promise<void> {
+        this.tokenValidate(req, res, next);
+        const id = this.decodeTokenId(req, res);
+        const userRepository: UserRepository = new UserRepository();
+        if (!id) RouteResponse.unauthorizedError(res);
+        else {
+            const user: User | undefined = await userRepository.findById(id);
+            if (!user) RouteResponse.unauthorizedError(res, 'Erro ao tentar logar');
+        }
     }
 
     /**
