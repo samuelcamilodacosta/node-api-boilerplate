@@ -10,9 +10,6 @@ import { BaseValidator } from '../../../../library';
 // Repositories
 import { UserRepository } from '../../../../library/database/repository/UserRepository';
 
-// Entities
-import { User } from '../../../../library/database/entity';
-
 // Routes
 import { RouteResponse } from '../../../../routes';
 
@@ -94,14 +91,21 @@ export class AuthValidator extends BaseValidator {
      *
      * @returns Verifica se o usuário tem permissão de acesso.
      */
-    public static async accessPermission(req: Request, res: Response, next: NextFunction): Promise<void> {
-        this.tokenValidate(req, res, next);
-        const id = this.decodeTokenId(req, res);
+    public static accessPermission(req: Request, res: Response, next: NextFunction): void {
+        const token = req.headers.authorization?.replace('Bearer', '').trim();
+        const id = AuthValidator.decodeTokenId(req, res);
         const userRepository: UserRepository = new UserRepository();
-        if (!id) RouteResponse.unauthorizedError(res);
+        if (!token) RouteResponse.unauthorizedError(res);
+        else if (!id) RouteResponse.unauthorizedError(res);
         else {
-            const user: User | undefined = await userRepository.findById(id);
-            if (!user) RouteResponse.unauthorizedError(res, 'Erro ao tentar logar');
+            try {
+                jwt.verify(token, 'secret');
+                const user = userRepository.findById(id);
+                if (user === undefined) RouteResponse.unauthorizedError(res);
+                next();
+            } catch {
+                RouteResponse.unauthorizedError(res);
+            }
         }
     }
 

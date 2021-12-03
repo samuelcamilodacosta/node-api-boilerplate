@@ -79,18 +79,16 @@ export class UserController extends BaseController {
      *       - application/json
      *     produces:
      *       - application/json
+     *     security:
+     *       - BearerAuth: []
      *     requestBody:
      *       content:
      *         application/json:
      *           schema:
      *             type: object
      *             example:
-     *               id: userId
-     *               email: me@mail.com
      *               password: userPassword
      *             required:
-     *               - id
-     *               - email
      *               - password
      *             properties:
      *               id:
@@ -106,9 +104,11 @@ export class UserController extends BaseController {
     @PublicRoute()
     @Middlewares(AuthValidator.accessPermission, UserValidator.put())
     public async update(req: Request, res: Response): Promise<void> {
-        const user: User = req.body.userRef;
-
-        user.email = req.body.email;
+        const user: User = new User();
+        const id = AuthValidator.decodeTokenId(req, res);
+        const email = AuthValidator.decodeTokenEmail(req, res);
+        if (id) user.id = parseInt(id, 10);
+        if (email) user.email = email;
         user.password = req.body.password;
 
         await new UserRepository().update(user);
