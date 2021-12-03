@@ -78,7 +78,7 @@ export class UserValidator extends BaseValidator {
     public static put(): RequestHandler[] {
         return UserValidator.validationList({
             id: UserValidator.model.id,
-            ...UserValidator.model
+            password: UserValidator.model.password
         });
     }
 
