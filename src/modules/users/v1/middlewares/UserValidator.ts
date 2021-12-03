@@ -1,12 +1,6 @@
 // Libraries
-import { RequestHandler, Request, Response } from 'express';
+import { RequestHandler } from 'express';
 import { Schema } from 'express-validator';
-
-// JWT
-import jwt from 'jsonwebtoken';
-
-// Routes
-import { RouteResponse } from '../../../../routes';
 
 // Repositories
 import { UserRepository } from '../../../../library/database/repository/UserRepository';
@@ -28,7 +22,7 @@ export class UserValidator extends BaseValidator {
      *
      * Schema para validação no controller de usuários
      */
-    private static model: Schema = {
+    public static model: Schema = {
         id: {
             ...BaseValidator.validators.id(new UserRepository()),
             errorMessage: 'Usuário não encontrado'
@@ -86,34 +80,6 @@ export class UserValidator extends BaseValidator {
             id: UserValidator.model.id,
             ...UserValidator.model
         });
-    }
-
-    /**
-     * login
-     *
-     * @returns Lista de validadores
-     */
-    public static login(): RequestHandler[] {
-        return UserValidator.validationList({
-            email: UserValidator.model.email,
-            password: UserValidator.model.password
-        });
-    }
-
-    public static authMiddleware(req: Request, res: Response): string | void | jwt.JwtPayload {
-        const { authorization } = req.headers;
-
-        if (!authorization) {
-            return RouteResponse.unauthorizedError(res, 'Erro ao tentar logar');
-        }
-        const token = authorization.replace('Bearer', '').trim();
-
-        try {
-            const data = jwt.verify(token, 'secret');
-            return data;
-        } catch {
-            return RouteResponse.unauthorizedError(res, 'Erro ao tentar logar');
-        }
     }
 
     /**

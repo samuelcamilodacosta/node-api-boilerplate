@@ -59,7 +59,7 @@ export class UserRepository extends BaseRepository {
     }
 
     /**
-     * findByName
+     * findByEmail
      *
      * Busca um usuário pelo email
      *

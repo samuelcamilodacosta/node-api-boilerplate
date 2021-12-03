@@ -3,6 +3,7 @@ import { RequestHandler } from 'express';
 import { Schema } from 'express-validator';
 
 // Repositories
+import { MemberRepository } from '../../../../library/database/repository/MemberRepository';
 import { ListRepository } from '../../../../library/database/repository/ListRepository';
 import { ActivityRepository } from '../../../../library/database/repository/ActivityRepository';
 
@@ -10,8 +11,7 @@ import { ActivityRepository } from '../../../../library/database/repository/Acti
 import { BaseValidator } from '../../../../library/BaseValidator';
 
 // Entities
-// import { List } from '../../../../library/database/entity';
-import { Activity } from '../../../../library/database/entity';
+import { Activity, Member } from '../../../../library/database/entity';
 
 /**
  * ListValidator
@@ -37,7 +37,21 @@ export class ListValidator extends BaseValidator {
                     min: 3
                 }
             },
-            errorMessage: 'Nome muito curto.'
+            errorMessage: 'Nome inválido.',
+            custom: {
+                options: async (_: string, { req }) => {
+                    let check = false;
+
+                    if (req.body.familyMemberName) {
+                        const memberRepository: MemberRepository = new MemberRepository();
+                        const member: Member | undefined = await memberRepository.findByName(req.body.familyMemberName);
+
+                        check = member ? req.body.familyMemberName === member.name.toString() : true;
+                    }
+
+                    return check ? Promise.resolve() : Promise.reject();
+                }
+            }
         },
         activitiesId: {
             in: 'body',
@@ -75,7 +89,7 @@ export class ListValidator extends BaseValidator {
                 }
             }
         },
-        initialAllowanceAmount: {
+        discount: {
             in: 'body',
             isNumeric: true,
             notEmpty: true,

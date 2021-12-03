@@ -1,24 +1,18 @@
 import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
 @Entity()
-export class List extends BaseEntity {
+export class Member extends BaseEntity {
     @PrimaryGeneratedColumn() // Alterar para @PrimaryGeneratedColumn em caso de banco diferente do MongoDB
     public id: number;
 
-    @Column()
-    public familyMemberName: string;
+    @Column({ unique: true })
+    public name: string;
 
     @Column()
-    public activitiesId: string;
+    public birthDate: string;
 
     @Column()
-    public valueOfActivities: string;
-
-    @Column()
-    public discount: number;
-
-    @Column()
-    public status: string;
+    public allowanceValue: number;
 
     @CreateDateColumn()
     public createdAt: Date;

@@ -22,19 +22,50 @@ import { ListRepository } from '../../../../library/database/repository';
 
 // Validators
 import { ListValidator } from '../middlewares/ListValidator';
+import { AuthValidator } from '../../../auth/v1';
 
 @Controller(EnumEndpoints.LIST)
 export class ListController extends BaseController {
     /**
      * @swagger
-     * /v1/list:
+     * /v1/list/{id}:
      *   get:
-     *     summary: Mostra todas as listas.
+     *     summary: Encontra uma Lista pelo ID.
      *     tags: [List]
      *     consumes:
      *       - application/json
      *     produces:
      *       - application/json
+     *     security:
+     *       - BearerAuth: []
+     *     parameters:
+     *       - in: path
+     *         name: id
+     *         schema:
+     *           type: string
+     *         required: true
+     *     responses:
+     *       $ref: '#/components/responses/baseResponse'
+     */
+    @Get('/:id')
+    @PublicRoute()
+    @Middlewares(AuthValidator.authMiddleware, ListValidator.onlyId())
+    public async getListById(req: Request, res: Response): Promise<void> {
+        RouteResponse.success({ ...req.body.listRef }, res);
+    }
+
+    /**
+     * @swagger
+     * /v1/list:
+     *   get:
+     *     summary: Mostra todas as Listas.
+     *     tags: [List]
+     *     consumes:
+     *       - application/json
+     *     produces:
+     *       - application/json
+     *     security:
+     *       - BearerAuth: []
      *     parameters:
      *       - $ref: '#/components/parameters/listPageRef'
      *       - $ref: '#/components/parameters/listSizeRef'
@@ -45,6 +76,7 @@ export class ListController extends BaseController {
      */
     @Get()
     @PublicRoute()
+    @Middlewares(AuthValidator.authMiddleware)
     public async getAll(req: Request, res: Response): Promise<void> {
         const [rows, count] = await new ListRepository().list<List>(ListController.listParams(req));
         RouteResponse.success({ rows, count }, res);
@@ -60,6 +92,8 @@ export class ListController extends BaseController {
      *       - application/json
      *     produces:
      *       - application/json
+     *     security:
+     *       - BearerAuth: []
      *     requestBody:
      *       content:
      *         application/json:
@@ -69,13 +103,13 @@ export class ListController extends BaseController {
      *               familyMemberName: familyMemberName
      *               activitiesId: [1, 2, 3]
      *               valueOfActivities: [-10, 0, 30]
-     *               initialAllowanceAmount: 100
-     *               discount: 10
+     *               discount: 100
+     *               status: Em espera
      *             required:
      *               - familyMemberName
      *               - activitiesId
      *               - valueOfActivities
-     *               - initialAllowanceAmount
+     *               - discount
      *               - status
      *             properties:
      *               familyMemberName:
@@ -84,22 +118,22 @@ export class ListController extends BaseController {
      *                 type: string
      *               valueOfActivities:
      *                 type: string
-     *               initialAllowanceAmount:
-     *                 type: number
      *               discount:
      *                 type: number
+     *               status:
+     *                 type: string
      *     responses:
      *       $ref: '#/components/responses/baseCreate'
      */
     @Post()
     @PublicRoute()
-    @Middlewares(ListValidator.post())
+    @Middlewares(AuthValidator.authMiddleware, ListValidator.post())
     public async add(req: Request, res: Response): Promise<void> {
         const newList: DeepPartial<List> = {
             familyMemberName: req.body.familyMemberName,
             activitiesId: req.body.activitiesId,
             valueOfActivities: req.body.valueOfActivities,
-            initialAllowanceAmount: req.body.initialAllowanceAmount,
+            discount: req.body.discount,
             status: req.body.status
         };
 
@@ -112,12 +146,14 @@ export class ListController extends BaseController {
      * @swagger
      * /v1/list:
      *   put:
-     *     summary: Alterar uma lista
+     *     summary: Altera uma Lista
      *     tags: [List]
      *     consumes:
      *       - application/json
      *     produces:
      *       - application/json
+     *     security:
+     *       - BearerAuth: []
      *     requestBody:
      *       content:
      *         application/json:
@@ -128,13 +164,13 @@ export class ListController extends BaseController {
      *               familyMemberName: familyMemberName
      *               activitiesId: [1, 2, 3]
      *               valueOfActivities: [10, 0, 15]
-     *               initialAllowanceAmount: 100
-     *               discount: 15
+     *               discount: 100
+     *               status: Em espera
      *             required:
      *               - familyMemberName
      *               - activitiesId
      *               - valueOfActivities
-     *               - initialAllowanceAmount
+     *               - discount
      *               - status
      *             properties:
      *               familyMemberName:
@@ -143,23 +179,23 @@ export class ListController extends BaseController {
      *                 type: string
      *               valueOfActivities:
      *                 type: string
-     *               initialAllowanceAmount:
-     *                 type: number
      *               discount:
+     *                 type: number
+     *               status:
      *                 type: string
      *     responses:
      *       $ref: '#/components/responses/baseEmpty'
      */
     @Put()
     @PublicRoute()
-    @Middlewares(ListValidator.put())
+    @Middlewares(AuthValidator.authMiddleware, ListValidator.put())
     public async update(req: Request, res: Response): Promise<void> {
         const list: List = req.body.listRef;
 
         list.familyMemberName = req.body.familyMemberName;
         list.activitiesId = req.body.activitiesId;
         list.valueOfActivities = req.body.valueOfActivities;
-        list.initialAllowanceAmount = req.body.initialAllowanceAmount;
+        list.discount = req.body.discount;
         list.status = req.body.status;
 
         await new ListRepository().update(list);
@@ -169,17 +205,19 @@ export class ListController extends BaseController {
 
     /**
      * @swagger
-     * /v1/list/{activityId}:
+     * /v1/list/{id}:
      *   delete:
-     *     summary: Apaga uma lista
+     *     summary: Apaga uma Lista
      *     tags: [List]
      *     consumes:
      *       - application/json
      *     produces:
      *       - application/json
+     *     security:
+     *       - BearerAuth: []
      *     parameters:
      *       - in: path
-     *         name: idList
+     *         name: id
      *         schema:
      *           type: string
      *         required: true
@@ -188,7 +226,7 @@ export class ListController extends BaseController {
      */
     @Delete('/:id')
     @PublicRoute()
-    @Middlewares(ListValidator.onlyId())
+    @Middlewares(AuthValidator.authMiddleware, ListValidator.onlyId())
     public async remove(req: Request, res: Response): Promise<void> {
         await new ListRepository().delete(req.params.id);
 

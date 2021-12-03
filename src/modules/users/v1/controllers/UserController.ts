@@ -1,10 +1,6 @@
 // Modules
 import { DeepPartial } from 'typeorm';
 import { Request, Response } from 'express';
-import bcrypt from 'bcryptjs';
-
-// JWT
-import jwt from 'jsonwebtoken';
 
 // Library
 import { BaseController } from '../../../../library';
@@ -26,57 +22,10 @@ import { UserRepository } from '../../../../library/database/repository';
 
 // Validators
 import { UserValidator } from '../middlewares/UserValidator';
+import { AuthValidator } from '../../../auth/v1';
 
 @Controller(EnumEndpoints.USER_V1)
 export class UserController extends BaseController {
-    /**
-     * @swagger
-     * /v1/user/login:
-     *   post:
-     *     summary: Permite ou não o login do usuário
-     *     tags: [Users]
-     *     consumes:
-     *       - application/json
-     *     produces:
-     *       - application/json
-     *     requestBody:
-     *       content:
-     *         application/json:
-     *           schema:
-     *             type: object
-     *             example:
-     *               email: me@mail.com
-     *               password: yourPassword
-     *             required:
-     *               - email
-     *               - password
-     *             properties:
-     *               email:
-     *                 type: string
-     *               password:
-     *                 type: string
-     *     responses:
-     *       $ref: '#/components/responses/baseResponse'
-     */
-    @Post('/login')
-    @PublicRoute()
-    @Middlewares(UserValidator.login())
-    public async login(req: Request, res: Response): Promise<void> {
-        const user = await new UserRepository().findByEmail(req.body.email);
-
-        if (!user) {
-            return RouteResponse.unauthorizedError(res, 'Erro ao tentar logar');
-        }
-
-        const token = jwt.sign({ id: user.id, email: user.email }, 'secret', { expiresIn: '10h' });
-        const isValidPassword = await bcrypt.compare(req.body.password, user.password);
-
-        if (isValidPassword) {
-            return RouteResponse.success(token, res);
-        }
-        return RouteResponse.unauthorizedError(res, 'Erro ao tentar logar');
-    }
-
     /**
      * @swagger
      * /v1/user:
@@ -87,14 +36,6 @@ export class UserController extends BaseController {
      *       - application/json
      *     produces:
      *       - application/json
-     *     components:
-     *       securitySchemes:
-     *         bearerAuth:
-     *           type: http
-     *           scheme: bearer
-     *           bearerFormat: JWT
-     *     security:
-     *       - bearerAuth: []
      *     requestBody:
      *       content:
      *         application/json:
@@ -116,7 +57,7 @@ export class UserController extends BaseController {
      */
     @Post()
     @PublicRoute()
-    @Middlewares(UserValidator.authMiddleware, UserValidator.post())
+    @Middlewares(UserValidator.post())
     public async add(req: Request, res: Response): Promise<void> {
         const newUser: DeepPartial<User> = {
             email: req.body.email,
@@ -177,7 +118,7 @@ export class UserController extends BaseController {
 
     /**
      * @swagger
-     * /v1/user/{userId}:
+     * /v1/user/:
      *   delete:
      *     summary: Apaga um usuário (responsável)
      *     tags: [Users]
@@ -185,21 +126,21 @@ export class UserController extends BaseController {
      *       - application/json
      *     produces:
      *       - application/json
-     *     parameters:
-     *       - in: path
-     *         name: userId
-     *         schema:
-     *           type: string
-     *         required: true
+     *     security:
+     *       - BearerAuth: []
      *     responses:
      *       $ref: '#/components/responses/baseResponse'
      */
-    @Delete('/:id')
+    @Delete()
     @PublicRoute()
-    @Middlewares(UserValidator.onlyId())
+    @Middlewares(AuthValidator.authMiddleware, UserValidator.onlyId())
     public async remove(req: Request, res: Response): Promise<void> {
-        await new UserRepository().delete(req.params.id);
-
-        RouteResponse.success(req.params.id, res);
+        const id = AuthValidator.decodeTokenId(req, res);
+        if (id) {
+            await new UserRepository().delete(id);
+            RouteResponse.success('Usuário deletado.', res);
+        } else {
+            RouteResponse.unauthorizedError(res, 'Erro ao deletar, dados inválidos.');
+        }
     }
 }

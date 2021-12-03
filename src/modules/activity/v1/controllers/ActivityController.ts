@@ -22,6 +22,7 @@ import { ActivityRepository } from '../../../../library/database/repository';
 
 // Validators
 import { ActivityValidator } from '../middlewares/ActivityValidator';
+import { AuthValidator } from '../../../auth/v1';
 
 @Controller(EnumEndpoints.ACTIVITY)
 export class ActivityController extends BaseController {
@@ -35,6 +36,8 @@ export class ActivityController extends BaseController {
      *       - application/json
      *     produces:
      *       - application/json
+     *     security:
+     *       - BearerAuth: []
      *     parameters:
      *       - $ref: '#/components/parameters/listPageRef'
      *       - $ref: '#/components/parameters/listSizeRef'
@@ -45,6 +48,7 @@ export class ActivityController extends BaseController {
      */
     @Get()
     @PublicRoute()
+    @Middlewares(AuthValidator.authMiddleware)
     public async getAll(req: Request, res: Response): Promise<void> {
         const [rows, count] = await new ActivityRepository().list<Activity>(ActivityController.listParams(req));
         RouteResponse.success({ rows, count }, res);
@@ -60,6 +64,8 @@ export class ActivityController extends BaseController {
      *       - application/json
      *     produces:
      *       - application/json
+     *     security:
+     *       - BearerAuth: []
      *     requestBody:
      *       content:
      *         application/json:
@@ -77,7 +83,7 @@ export class ActivityController extends BaseController {
      */
     @Post()
     @PublicRoute()
-    @Middlewares(ActivityValidator.post())
+    @Middlewares(AuthValidator.authMiddleware, ActivityValidator.post())
     public async add(req: Request, res: Response): Promise<void> {
         const newActivity: DeepPartial<Activity> = {
             description: req.body.description
@@ -98,6 +104,8 @@ export class ActivityController extends BaseController {
      *       - application/json
      *     produces:
      *       - application/json
+     *     security:
+     *       - BearerAuth: []
      *     requestBody:
      *       content:
      *         application/json:
@@ -119,7 +127,7 @@ export class ActivityController extends BaseController {
      */
     @Put()
     @PublicRoute()
-    @Middlewares(ActivityValidator.put())
+    @Middlewares(AuthValidator.authMiddleware, ActivityValidator.put())
     public async update(req: Request, res: Response): Promise<void> {
         const activity: Activity = req.body.activityRef;
 
@@ -140,6 +148,8 @@ export class ActivityController extends BaseController {
      *       - application/json
      *     produces:
      *       - application/json
+     *     security:
+     *       - BearerAuth: []
      *     parameters:
      *       - in: path
      *         name: activityId
@@ -151,7 +161,7 @@ export class ActivityController extends BaseController {
      */
     @Delete('/:id')
     @PublicRoute()
-    @Middlewares(ActivityValidator.onlyId())
+    @Middlewares(AuthValidator.authMiddleware, ActivityValidator.onlyId())
     public async remove(req: Request, res: Response): Promise<void> {
         await new ActivityRepository().delete(req.params.id);
 
