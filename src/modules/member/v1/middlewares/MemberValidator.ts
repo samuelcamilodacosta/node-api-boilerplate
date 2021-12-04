@@ -39,13 +39,32 @@ export class MemberValidator extends BaseValidator {
         },
         birthDate: {
             in: 'body',
-            isDate: true,
-            errorMessage: 'Data inválida.'
+            errorMessage: 'Data de nascimento inválida.',
+            custom: {
+                options: value => {
+                    const date = new Date();
+                    const arrayBirthday = value.split('/');
+                    let age = date.getFullYear() - arrayBirthday[2];
+                    const month = date.getMonth() + 1;
+                    if (month < Number(arrayBirthday[1])) age -= 1;
+                    else if (month === Number(arrayBirthday[1])) {
+                        if (date.getDate() < Number(arrayBirthday[0])) age -= 1;
+                    }
+                    if (age < 18 && age >= 0) return true;
+                    return false;
+                }
+            }
         },
         allowanceValue: {
             in: 'body',
             isNumeric: true,
-            errorMessage: 'Mesada inválida'
+            errorMessage: 'Mesada inválida',
+            customSanitizer: {
+                options: value => {
+                    const allowance = value.toFixed(2);
+                    return parseFloat(allowance);
+                }
+            }
         },
         duplicate: {
             errorMessage: 'Nome já cadastrado.',

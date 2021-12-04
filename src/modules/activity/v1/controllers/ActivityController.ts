@@ -56,6 +56,38 @@ export class ActivityController extends BaseController {
 
     /**
      * @swagger
+     * /v1/activity/{activityId}:
+     *   get:
+     *     summary: Busca uma atividade específica
+     *     tags: [Activity]
+     *     consumes:
+     *       - application/json
+     *     produces:
+     *       - application/json
+     *     security:
+     *       - BearerAuth: []
+     *     parameters:
+     *       - in: path
+     *         name: activityId
+     *         schema:
+     *           type: string
+     *         required: true
+     *     responses:
+     *       $ref: '#/components/responses/baseResponse'
+     */
+    @Get('/:id')
+    @PublicRoute()
+    @Middlewares(AuthValidator.accessPermission, ActivityValidator.onlyId())
+    public async search(req: Request, res: Response): Promise<void> {
+        const id = parseInt(req.params.id, 10);
+        if (id) {
+            const data = await new ActivityRepository().findById(id);
+            RouteResponse.success(data, res);
+        }
+    }
+
+    /**
+     * @swagger
      * /v1/activity:
      *   post:
      *     summary: Cadastra uma atividade.
