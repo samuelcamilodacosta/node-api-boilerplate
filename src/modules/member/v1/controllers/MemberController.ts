@@ -23,6 +23,7 @@ import { MemberRepository } from '../../../../library/database/repository';
 // Validators
 import { MemberValidator } from '../middlewares/MemberValidator';
 import { AuthValidator } from '../../../auth/v1';
+import { upload } from '../middlewares/ImageValidator';
 
 @Controller(EnumEndpoints.MEMBER)
 export class MemberController extends BaseController {
@@ -68,13 +69,9 @@ export class MemberController extends BaseController {
      *       - BearerAuth: []
      *     requestBody:
      *       content:
-     *         application/json:
+     *         multipart/form-data:
      *           schema:
      *             type: object
-     *             example:
-     *               name: memberName
-     *               birthDate: 10/10/2000
-     *               allowanceValue: 1000.00
      *             required:
      *               - name
      *               - birthDate
@@ -93,14 +90,14 @@ export class MemberController extends BaseController {
     @PublicRoute()
     @Middlewares(AuthValidator.accessPermission, MemberValidator.post())
     public async add(req: Request, res: Response): Promise<void> {
+        const { name, birthDate, allowanceValue } = req.body;
+
         const newUser: DeepPartial<Member> = {
-            name: req.body.name,
-            birthDate: req.body.birthDate,
-            allowanceValue: req.body.allowanceValue
+            name,
+            birthDate,
+            allowanceValue
         };
-
         await new MemberRepository().insert(newUser);
-
         RouteResponse.successCreate(res);
     }
 
@@ -125,7 +122,7 @@ export class MemberController extends BaseController {
      *               id: userId
      *               name: memberName
      *               birthDate: 10/10/2000
-     *               allowanceValue: 1000.00
+     *               allowanceValue: 1000.50
      *             required:
      *               - id
      *               - name
@@ -147,11 +144,12 @@ export class MemberController extends BaseController {
     @PublicRoute()
     @Middlewares(AuthValidator.accessPermission, MemberValidator.put())
     public async update(req: Request, res: Response): Promise<void> {
-        const member: Member = req.body.memberRef;
+        const { name, birthDate, allowanceValue, memberRef } = req.body;
+        const member: Member = memberRef;
 
-        member.name = req.body.name;
-        member.birthDate = req.body.birthDate;
-        member.allowanceValue = req.body.allowanceValue;
+        member.name = name;
+        member.birthDate = birthDate;
+        member.allowanceValue = allowanceValue;
 
         await new MemberRepository().update(member);
 

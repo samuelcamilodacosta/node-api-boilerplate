@@ -59,10 +59,10 @@ export class MemberValidator extends BaseValidator {
             in: 'body',
             isNumeric: true,
             errorMessage: 'Mesada inválida',
-            customSanitizer: {
+            custom: {
                 options: value => {
-                    const allowance = value.toFixed(2);
-                    return parseFloat(allowance);
+                    const allowance = parseFloat(value);
+                    return allowance.toFixed(2);
                 }
             }
         },

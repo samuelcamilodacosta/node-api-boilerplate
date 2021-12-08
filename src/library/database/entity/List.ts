@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, CreateDateColumn, UpdateDateColumn, ManyToMany, JoinTable } from 'typeorm';
+import { Activity } from './Activity';
 
 @Entity()
 export class List extends BaseEntity {
@@ -9,16 +10,17 @@ export class List extends BaseEntity {
     public familyMemberName: string;
 
     @Column()
-    public activitiesId: string;
-
-    @Column()
-    public valueOfActivities: string;
-
-    @Column()
     public discount: number;
 
     @Column()
     public status: string;
+
+    @Column()
+    public values: string;
+
+    @ManyToMany(() => Activity, { eager: true })
+    @JoinTable()
+    public activities: Activity[];
 
     @CreateDateColumn()
     public createdAt: Date;

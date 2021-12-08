@@ -118,7 +118,8 @@ export class ActivityController extends BaseController {
     @Middlewares(AuthValidator.accessPermission, ActivityValidator.post())
     public async add(req: Request, res: Response): Promise<void> {
         const newActivity: DeepPartial<Activity> = {
-            description: req.body.description
+            description: req.body.description,
+            value: 0
         };
 
         await new ActivityRepository().insert(newActivity);
@@ -161,12 +162,12 @@ export class ActivityController extends BaseController {
     @PublicRoute()
     @Middlewares(AuthValidator.accessPermission, ActivityValidator.put())
     public async update(req: Request, res: Response): Promise<void> {
+        const foundActivity = await new ActivityRepository().findById(req.body.id);
         const activity: Activity = req.body.activityRef;
 
         activity.description = req.body.description;
-
+        if (foundActivity) activity.value = foundActivity.value;
         await new ActivityRepository().update(activity);
-
         RouteResponse.successEmpty(res);
     }
 
@@ -196,7 +197,6 @@ export class ActivityController extends BaseController {
     @Middlewares(AuthValidator.accessPermission, ActivityValidator.onlyId())
     public async remove(req: Request, res: Response): Promise<void> {
         await new ActivityRepository().delete(req.params.id);
-
         RouteResponse.success(req.params.id, res);
     }
 }

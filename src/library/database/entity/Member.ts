@@ -11,8 +11,11 @@ export class Member extends BaseEntity {
     @Column()
     public birthDate: string;
 
-    @Column()
+    @Column({ type: 'float' })
     public allowanceValue: number;
+
+    // @Column()
+    // public image: string;
 
     @CreateDateColumn()
     public createdAt: Date;

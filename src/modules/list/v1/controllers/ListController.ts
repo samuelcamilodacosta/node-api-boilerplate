@@ -17,7 +17,7 @@ import { RouteResponse } from '../../../../routes';
 // Entities
 import { List } from '../../../../library/database/entity';
 
-// Repositories
+// Repositoriess
 import { ListRepository } from '../../../../library/database/repository';
 
 // Validators
@@ -89,9 +89,9 @@ export class ListController extends BaseController {
      *     summary: Cria uma Lista.
      *     tags: [List]
      *     consumes:
-     *       - application/json
+     *       - application/json:
      *     produces:
-     *       - application/json
+     *       - application/json:
      *     security:
      *       - BearerAuth: []
      *     requestBody:
@@ -101,27 +101,23 @@ export class ListController extends BaseController {
      *             type: object
      *             example:
      *               familyMemberName: familyMemberName
-     *               activitiesId: [1, 2, 3]
-     *               valueOfActivities: [-10, 0, 30]
-     *               discount: 100
      *               status: Em espera
+     *               values: [[1, 10], [2,-20]]
+     *               activities: [ "id": "1", "id": "2"]
      *             required:
      *               - familyMemberName
-     *               - activitiesId
-     *               - valueOfActivities
-     *               - discount
      *               - status
+     *               - values
+     *               - activities
      *             properties:
      *               familyMemberName:
      *                 type: string
-     *               activitiesId:
-     *                 type: string
-     *               valueOfActivities:
-     *                 type: string
-     *               discount:
-     *                 type: number
      *               status:
      *                 type: string
+     *               values:
+     *                 type: object
+     *               activities:
+     *                 type: object
      *     responses:
      *       $ref: '#/components/responses/baseCreate'
      */
@@ -129,16 +125,21 @@ export class ListController extends BaseController {
     @PublicRoute()
     @Middlewares(AuthValidator.accessPermission, ListValidator.post())
     public async add(req: Request, res: Response): Promise<void> {
+        const { familyMemberName, status, values, activities } = req.body;
+        const array = values.split(',');
+        let discount = 0;
+        array.forEach((element: string) => {
+            if (Number(element) < 0) discount += Number(element);
+        });
         const newList: DeepPartial<List> = {
-            familyMemberName: req.body.familyMemberName,
-            activitiesId: req.body.activitiesId,
-            valueOfActivities: req.body.valueOfActivities,
-            discount: req.body.discount,
-            status: req.body.status
+            familyMemberName,
+            discount,
+            status,
+            values,
+            activities
         };
 
         await new ListRepository().insert(newList);
-
         RouteResponse.successCreate(res);
     }
 
@@ -162,27 +163,23 @@ export class ListController extends BaseController {
      *             example:
      *               id: idList
      *               familyMemberName: familyMemberName
-     *               activitiesId: [1, 2, 3]
-     *               valueOfActivities: [10, 0, 15]
-     *               discount: 100
+     *               values: [10, 0, 15]
      *               status: Em espera
+     *               activities: [ "id": "1", "id": "2"]
      *             required:
      *               - familyMemberName
-     *               - activitiesId
-     *               - valueOfActivities
-     *               - discount
+     *               - values
      *               - status
+     *               - activities
      *             properties:
      *               familyMemberName:
      *                 type: string
-     *               activitiesId:
-     *                 type: string
-     *               valueOfActivities:
-     *                 type: string
-     *               discount:
-     *                 type: number
+     *               values:
+     *                 type: number[]
      *               status:
      *                 type: string
+     *               activities:
+     *                 type: object
      *     responses:
      *       $ref: '#/components/responses/baseEmpty'
      */
@@ -190,14 +187,17 @@ export class ListController extends BaseController {
     @PublicRoute()
     @Middlewares(AuthValidator.accessPermission, ListValidator.put())
     public async update(req: Request, res: Response): Promise<void> {
-        const list: List = req.body.listRef;
+        const { familyMemberName, values, status, activities, listRef } = req.body;
+        const discount = ListValidator.findDiscount(values);
+        const list: List = listRef;
 
-        list.familyMemberName = req.body.familyMemberName;
-        list.activitiesId = req.body.activitiesId;
-        list.valueOfActivities = req.body.valueOfActivities;
-        list.discount = req.body.discount;
-        list.status = req.body.status;
-
+        list.familyMemberName = familyMemberName;
+        list.values = values;
+        list.discount = discount;
+        list.status = status;
+        list.activities = [];
+        await new ListRepository().update(list);
+        list.activities = activities;
         await new ListRepository().update(list);
 
         RouteResponse.successEmpty(res);

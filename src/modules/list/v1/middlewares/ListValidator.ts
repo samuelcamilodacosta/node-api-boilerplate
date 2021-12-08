@@ -5,13 +5,12 @@ import { Schema } from 'express-validator';
 // Repositories
 import { MemberRepository } from '../../../../library/database/repository/MemberRepository';
 import { ListRepository } from '../../../../library/database/repository/ListRepository';
-import { ActivityRepository } from '../../../../library/database/repository/ActivityRepository';
 
 // Validators
 import { BaseValidator } from '../../../../library/BaseValidator';
 
 // Entities
-import { Activity, Member } from '../../../../library/database/entity';
+import { Member, List } from '../../../../library/database/entity';
 
 /**
  * ListValidator
@@ -53,70 +52,58 @@ export class ListValidator extends BaseValidator {
                 }
             }
         },
-        activitiesId: {
-            in: 'body',
-            errorMessage: 'ID das atividades inválido.',
-            custom: {
-                options: async (_: string, { req }) => {
-                    let check = false;
-
-                    if (req.body.activitiesId) {
-                        const array: number[] = req.body.activitiesId;
-                        const activityRepository: ActivityRepository = new ActivityRepository();
-                        array.forEach(async id => {
-                            const activity: Activity | undefined = await activityRepository.findById(id);
-                            if (activity === undefined) {
-                                check = true;
-                            }
-                        });
-                    }
-                    return check ? Promise.resolve() : Promise.reject();
-                }
-            },
-            customSanitizer: {
-                options: value => {
-                    return value.toString();
-                }
-            }
-        },
-        valueOfActivities: {
-            in: 'body',
-            notEmpty: true,
-            errorMessage: 'Valor das atividades inválido.',
-            customSanitizer: {
-                options: value => {
-                    return value.toString();
-                }
-            }
-        },
         discount: {
             in: 'body',
-            isNumeric: true,
-            notEmpty: true,
-            trim: true,
-            errorMessage: 'Valor da mesada inválido.'
+            errorMessage: 'Valor de desconto inválido.'
         },
         status: {
             in: 'body',
             notEmpty: true,
             errorMessage: 'Status inválido.',
-            customSanitizer: {
+            custom: {
                 options: async (_: string, { req }) => {
                     let check = false;
                     switch (req.body.status) {
                         case 'Em espera':
-                            check = false;
-                            break;
-                        case 'Em andamento':
-                            check = false;
-                            break;
-                        case 'Encerrada':
-                            check = false;
-                            break;
-                        default:
                             check = true;
                             break;
+                        case 'Em andamento':
+                            check = true;
+                            break;
+                        case 'Encerrada':
+                            check = true;
+                            break;
+                        default:
+                            check = false;
+                            break;
                     }
+                    return check ? Promise.resolve() : Promise.reject();
+                }
+            }
+        },
+        values: {
+            in: 'body',
+            isArray: true,
+            notEmpty: true,
+            errorMessage: 'Valores inválidos.',
+            customSanitizer: {
+                options: values => {
+                    return values.toString();
+                }
+            }
+        },
+        unique: {
+            errorMessage: 'Esse usuário já possui uma lista em andamento',
+            custom: {
+                options: async (_: string, { req }) => {
+                    let check = true;
+                    const [rows] = await new ListRepository().list<List>(req.body.familyMemberName);
+                    if (req.body.status === 'Em andamento') {
+                        rows.forEach(element => {
+                            if (element.status === 'Em andamento') check = false;
+                        });
+                    }
+
                     return check ? Promise.resolve() : Promise.reject();
                 }
             }
@@ -153,5 +140,14 @@ export class ListValidator extends BaseValidator {
         return BaseValidator.validationList({
             id: ListValidator.model.id
         });
+    }
+
+    public static findDiscount(values: string): number {
+        const array = values.split(',');
+        let sum = 0;
+        array.forEach((element: string) => {
+            if (Number(element) < 0) sum += Number(element);
+        });
+        return sum;
     }
 }

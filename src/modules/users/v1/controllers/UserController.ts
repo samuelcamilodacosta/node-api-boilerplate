@@ -73,7 +73,7 @@ export class UserController extends BaseController {
      * @swagger
      * /v1/user:
      *   put:
-     *     summary: Altera um usuário (responsável)
+     *     summary: Cadastrar nova senha (responsável)
      *     tags: [Users]
      *     consumes:
      *       - application/json
@@ -87,7 +87,7 @@ export class UserController extends BaseController {
      *           schema:
      *             type: object
      *             example:
-     *               password: userPassword
+     *               password: newPassword
      *             required:
      *               - password
      *             properties:

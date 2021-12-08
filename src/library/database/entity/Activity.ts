@@ -5,7 +5,7 @@ export class Activity extends BaseEntity {
     @PrimaryGeneratedColumn() // Alterar para @PrimaryGeneratedColumn em caso de banco diferente do MongoDB
     public id: number;
 
-    @Column({ unique: true })
+    @Column()
     public description: string;
 
     @CreateDateColumn()
