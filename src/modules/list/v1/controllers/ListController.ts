@@ -102,11 +102,13 @@ export class ListController extends BaseController {
      *             example:
      *               familyMemberName: familyMemberName
      *               status: Em espera
-     *               values: [[1, 10], [2,-20]]
+     *               listId: [1,2]
+     *               values: [10,-20]
      *               activities: [ "id": "1", "id": "2"]
      *             required:
      *               - familyMemberName
      *               - status
+     *               - listId
      *               - values
      *               - activities
      *             properties:
@@ -114,8 +116,10 @@ export class ListController extends BaseController {
      *                 type: string
      *               status:
      *                 type: string
+     *               listId:
+     *                 type: number[]
      *               values:
-     *                 type: object
+     *                 type: number[]
      *               activities:
      *                 type: object
      *     responses:
@@ -125,7 +129,7 @@ export class ListController extends BaseController {
     @PublicRoute()
     @Middlewares(AuthValidator.accessPermission, ListValidator.post())
     public async add(req: Request, res: Response): Promise<void> {
-        const { familyMemberName, status, values, activities } = req.body;
+        const { familyMemberName, status, listId, values, activities } = req.body;
         const array = values.split(',');
         let discount = 0;
         array.forEach((element: string) => {
@@ -135,6 +139,7 @@ export class ListController extends BaseController {
             familyMemberName,
             discount,
             status,
+            listId,
             values,
             activities
         };

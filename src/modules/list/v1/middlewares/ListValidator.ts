@@ -45,7 +45,7 @@ export class ListValidator extends BaseValidator {
                         const memberRepository: MemberRepository = new MemberRepository();
                         const member: Member | undefined = await memberRepository.findByName(req.body.familyMemberName);
 
-                        check = member ? req.body.familyMemberName === member.name.toString() : true;
+                        if (member) check = true;
                     }
 
                     return check ? Promise.resolve() : Promise.reject();
@@ -78,6 +78,17 @@ export class ListValidator extends BaseValidator {
                             break;
                     }
                     return check ? Promise.resolve() : Promise.reject();
+                }
+            }
+        },
+        listId: {
+            in: 'body',
+            isArray: true,
+            notEmpty: true,
+            errorMessage: 'Lista de IDs inválidos.',
+            customSanitizer: {
+                options: listId => {
+                    return listId.toString();
                 }
             }
         },

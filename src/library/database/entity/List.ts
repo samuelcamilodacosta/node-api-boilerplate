@@ -16,6 +16,9 @@ export class List extends BaseEntity {
     public status: string;
 
     @Column()
+    public listId: string;
+
+    @Column()
     public values: string;
 
     @ManyToMany(() => Activity, { eager: true })
