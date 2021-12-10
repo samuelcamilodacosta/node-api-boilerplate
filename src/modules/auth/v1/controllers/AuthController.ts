@@ -1,15 +1,8 @@
 // Modules
 import { Request, Response } from 'express';
-import bcrypt from 'bcryptjs';
-
-// JWT
-import jwt from 'jsonwebtoken';
 
 // Library
-import { BaseController } from '../../../../library';
-
-// Entities
-import { User } from '../../../../library/database/entity';
+import { BaseController, UserRepository } from '../../../../library';
 
 // Decorators
 import { Controller, Middlewares, Post, PublicRoute, Get } from '../../../../decorators';
@@ -19,9 +12,6 @@ import { EnumEndpoints } from '../../../../models';
 
 // Routes
 import { RouteResponse } from '../../../../routes';
-
-// Repositories
-import { UserRepository } from '../../../../library/database/repository';
 
 // Validators
 import { AuthValidator } from '../middlewares/AuthValidator';
@@ -61,21 +51,9 @@ export class AuthController extends BaseController {
     @PublicRoute()
     @Middlewares(AuthValidator.login())
     public async authenticate(req: Request, res: Response): Promise<void> {
-        const user: User | undefined = await new UserRepository().findByEmail(req.body.email);
-
-        if (!user) {
-            RouteResponse.unauthorizedError(res, 'Erro ao tentar logar');
-        } else {
-            const isValidPassword = await bcrypt.compare(req.body.password, user.password);
-
-            if (!isValidPassword) {
-                RouteResponse.unauthorizedError(res, 'Erro ao tentar logar');
-            }
-
-            // Gerando token de acesso
-            const token = jwt.sign({ id: user.id, email: user.email }, 'secret', { expiresIn: '10h' });
-            RouteResponse.success(token, res);
-        }
+        const token = await new UserRepository().authenticateUser(req.body.email, req.body.password);
+        if (token) RouteResponse.success(token, res);
+        RouteResponse.unauthorizedError(res, 'Erro ao tentar logar');
     }
 
     /**
