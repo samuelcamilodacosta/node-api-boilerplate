@@ -1,10 +1,27 @@
-import { Entity, ObjectIdColumn, ObjectID, Column, BaseEntity, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, Column, BaseEntity, ObjectIdColumn, ObjectID, BeforeUpdate, BeforeInsert } from 'typeorm';
 import { IActivityValue } from '../../../models/IActivityValue';
 
 @Entity()
 export class List extends BaseEntity {
-    @ObjectIdColumn() // Alterar para @PrimaryGeneratedColumn em caso de banco diferente do MongoDB
+    @ObjectIdColumn()
     public id: ObjectID;
+
+    @Column()
+    public createdAt: Date;
+
+    @Column()
+    public updatedAt: Date;
+
+    @BeforeInsert()
+    public setCreateDate(): void {
+        this.createdAt = new Date();
+    }
+
+    @BeforeInsert()
+    @BeforeUpdate()
+    public setUpdateDate(): void {
+        this.updatedAt = new Date();
+    }
 
     @Column()
     public familyMemberName: string;
@@ -14,10 +31,4 @@ export class List extends BaseEntity {
 
     @Column()
     public activities: IActivityValue[];
-
-    @CreateDateColumn()
-    public createdAt: Date;
-
-    @UpdateDateColumn()
-    public updatedAt: Date;
 }

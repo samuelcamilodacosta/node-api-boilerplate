@@ -1,9 +1,26 @@
-import { Entity, ObjectID, ObjectIdColumn, Column, BaseEntity, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, Column, BaseEntity, ObjectID, ObjectIdColumn, BeforeInsert, BeforeUpdate } from 'typeorm';
 
 @Entity()
 export class Member extends BaseEntity {
-    @ObjectIdColumn() // Alterar para @PrimaryGeneratedColumn em caso de banco diferente do MongoDB
+    @ObjectIdColumn()
     public id: ObjectID;
+
+    @Column()
+    public createdAt: Date;
+
+    @Column()
+    public updatedAt: Date;
+
+    @BeforeInsert()
+    public setCreateDate(): void {
+        this.createdAt = new Date();
+    }
+
+    @BeforeInsert()
+    @BeforeUpdate()
+    public setUpdateDate(): void {
+        this.updatedAt = new Date();
+    }
 
     @Column({ unique: true })
     public name: string;
@@ -13,13 +30,4 @@ export class Member extends BaseEntity {
 
     @Column({ type: 'float' })
     public allowanceValue: number;
-
-    // @Column()
-    // public image: string;
-
-    @CreateDateColumn()
-    public createdAt: Date;
-
-    @UpdateDateColumn()
-    public updatedAt: Date;
 }

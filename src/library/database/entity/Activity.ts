@@ -1,16 +1,27 @@
-import { Entity, Column, BaseEntity, CreateDateColumn, UpdateDateColumn, ObjectIdColumn, ObjectID } from 'typeorm';
+import { Entity, Column, BaseEntity, ObjectID, ObjectIdColumn, BeforeInsert, BeforeUpdate } from 'typeorm';
 
 @Entity()
 export class Activity extends BaseEntity {
-    @ObjectIdColumn() // Alterar para @PrimaryGeneratedColumn em caso de banco diferente do MongoDB
+    @ObjectIdColumn()
     public id: ObjectID;
 
     @Column()
-    public description: string;
-
-    @CreateDateColumn()
     public createdAt: Date;
 
-    @UpdateDateColumn()
+    @Column()
     public updatedAt: Date;
+
+    @BeforeInsert()
+    public setCreateDate(): void {
+        this.createdAt = new Date();
+    }
+
+    @BeforeInsert()
+    @BeforeUpdate()
+    public setUpdateDate(): void {
+        this.updatedAt = new Date();
+    }
+
+    @Column()
+    public description: string;
 }
