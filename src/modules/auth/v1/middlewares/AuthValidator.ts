@@ -29,7 +29,6 @@ export class AuthValidator extends BaseValidator {
      */
     public static tokenValidate(req: Request, res: Response, next: NextFunction): void {
         const { authorization } = req.headers;
-
         if (!authorization) {
             RouteResponse.unauthorizedError(res);
         } else {
@@ -52,7 +51,6 @@ export class AuthValidator extends BaseValidator {
      */
     public static decodeTokenEmail(req: Request, res: Response): string | undefined {
         const { authorization } = req.headers;
-
         if (!authorization) {
             RouteResponse.unauthorizedError(res, 'Erro ao tentar logar');
         } else {

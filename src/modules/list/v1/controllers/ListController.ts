@@ -117,12 +117,10 @@ export class ListController extends BaseController {
     @PublicRoute()
     @Middlewares(AuthValidator.accessPermission, ListValidator.post())
     public async add(req: Request, res: Response): Promise<void> {
-        const { familyMemberName, status } = req.body;
         const newList: DeepPartial<List> = {
-            familyMemberName,
-            status
+            familyMemberName: req.body.familyMemberName,
+            status: req.body.status
         };
-
         await new ListRepository().insert(newList);
         RouteResponse.successCreate(res);
     }
@@ -153,7 +151,6 @@ export class ListController extends BaseController {
     @Middlewares(AuthValidator.accessPermission, ListValidator.onlyId())
     public async remove(req: Request, res: Response): Promise<void> {
         await new ListRepository().delete(req.params.id);
-
         RouteResponse.success(req.params.id, res);
     }
 }
