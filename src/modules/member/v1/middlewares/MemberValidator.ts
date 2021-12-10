@@ -61,8 +61,7 @@ export class MemberValidator extends BaseValidator {
             errorMessage: 'Mesada inválida',
             custom: {
                 options: value => {
-                    const allowance = parseFloat(value);
-                    return allowance.toFixed(2);
+                    return parseFloat(value.toFixed(2));
                 }
             }
         },
@@ -71,14 +70,10 @@ export class MemberValidator extends BaseValidator {
             custom: {
                 options: async (_: string, { req }) => {
                     let check = false;
-
                     if (req.body.name) {
-                        const memberRepository: MemberRepository = new MemberRepository();
-                        const member: Member | undefined = await memberRepository.findByName(req.body.name);
-
+                        const member: Member | undefined = await new MemberRepository().findByName(req.body.name);
                         check = member ? req.body.id === member.id.toString() : true;
                     }
-
                     return check ? Promise.resolve() : Promise.reject();
                 }
             }
