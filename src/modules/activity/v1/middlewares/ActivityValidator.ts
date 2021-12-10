@@ -42,14 +42,10 @@ export class ActivityValidator extends BaseValidator {
             custom: {
                 options: async (_: string, { req }) => {
                     let check = false;
-
                     if (req.body.description) {
-                        const activityRepository: ActivityRepository = new ActivityRepository();
-                        const activity: Activity | undefined = await activityRepository.findByDescription(req.body.description);
-
+                        const activity: Activity | undefined = await new ActivityRepository().findByDescription(req.body.description);
                         check = activity ? req.body.id === activity.id.toString() : true;
                     }
-
                     return check ? Promise.resolve() : Promise.reject();
                 }
             }
@@ -71,10 +67,7 @@ export class ActivityValidator extends BaseValidator {
      * @returns Lista de validadores
      */
     public static put(): RequestHandler[] {
-        return ActivityValidator.validationList({
-            id: ActivityValidator.model.id,
-            ...ActivityValidator.model
-        });
+        return ActivityValidator.validationList({ id: ActivityValidator.model.id, ...ActivityValidator.model });
     }
 
     /**
@@ -83,8 +76,6 @@ export class ActivityValidator extends BaseValidator {
      * @returns Lista de validadores
      */
     public static onlyId(): RequestHandler[] {
-        return BaseValidator.validationList({
-            id: ActivityValidator.model.id
-        });
+        return BaseValidator.validationList({ id: ActivityValidator.model.id });
     }
 }
