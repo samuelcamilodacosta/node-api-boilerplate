@@ -1,5 +1,4 @@
 // Modules
-import { DeepPartial } from 'typeorm';
 import { Request, Response } from 'express';
 
 // Library
@@ -18,7 +17,7 @@ import { RouteResponse } from '../../../../routes';
 import { Activity } from '../../../../library/database/entity';
 
 // Repositories
-import { ActivityRepository, ListRepository } from '../../../../library/database/repository';
+import { ActivityRepository } from '../../../../library/database/repository';
 
 // Validators
 import { ActivityValidator } from '../middlewares/ActivityValidator';
@@ -79,8 +78,7 @@ export class ActivityController extends BaseController {
     @PublicRoute()
     @Middlewares(AuthValidator.accessPermission, ActivityValidator.onlyId())
     public async search(req: Request, res: Response): Promise<void> {
-        const data = await new ActivityRepository().findById(req.params.id);
-        RouteResponse.success(data, res);
+        RouteResponse.success(await new ActivityRepository().findById(req.params.id), res);
     }
 
     /**
@@ -114,10 +112,7 @@ export class ActivityController extends BaseController {
     @PublicRoute()
     @Middlewares(AuthValidator.accessPermission, ActivityValidator.post())
     public async add(req: Request, res: Response): Promise<void> {
-        const newActivity: DeepPartial<Activity> = {
-            description: req.body.description
-        };
-        await new ActivityRepository().insert(newActivity);
+        await new ActivityRepository().insert(req.body.description);
         RouteResponse.successCreate(res);
     }
 
@@ -158,7 +153,6 @@ export class ActivityController extends BaseController {
     public async update(req: Request, res: Response): Promise<void> {
         const activity: Activity = req.body.activityRef;
         activity.description = req.body.description;
-        await new ListRepository().deleteActivitiesFromLists(activity.id.toString());
         await new ActivityRepository().update(activity);
         RouteResponse.successEmpty(res);
     }

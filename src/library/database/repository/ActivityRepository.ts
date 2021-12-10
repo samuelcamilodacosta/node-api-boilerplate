@@ -6,6 +6,7 @@ import { Activity } from '../entity';
 
 // Repositories
 import { BaseRepository } from './BaseRepository';
+import { ListRepository } from './ListRepository';
 
 /**
  * AcitivityRepository
@@ -23,11 +24,14 @@ export class ActivityRepository extends BaseRepository {
      *
      * Adiciona uma nova atividade
      *
-     * @param activity - Dados da atividade
+     * @param description - Descrição da atividade
      *
      * @returns Atividade adicionada
      */
-    public insert(activity: DeepPartial<Activity>): Promise<Activity> {
+    public insert(description: string): Promise<Activity> {
+        const activity: DeepPartial<Activity> = {
+            description
+        };
         const userRepository: Repository<Activity> = this.getConnection().getRepository(Activity);
         return userRepository.save(userRepository.create(activity));
     }
@@ -42,6 +46,7 @@ export class ActivityRepository extends BaseRepository {
      * @returns Atividade alterada
      */
     public update(activity: Activity): Promise<Activity> {
+        new ListRepository().deleteActivitiesFromLists(activity.id.toString());
         return this.getConnection().getRepository(Activity).save(activity);
     }
 
