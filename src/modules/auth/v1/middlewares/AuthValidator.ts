@@ -36,8 +36,7 @@ export class AuthValidator extends BaseValidator {
             try {
                 const token = authorization.replace('Bearer', '').trim();
                 const data = jwt.verify(token, 'secret');
-                const { id, email } = data as ITokenPayload;
-                req.userId = id;
+                const { email } = data as ITokenPayload;
                 req.userEmail = email;
                 next();
             } catch {
@@ -67,40 +66,20 @@ export class AuthValidator extends BaseValidator {
     }
 
     /**
-     * decodeTokenId
-     *
-     * @returns Decodifica o token retornando o ID
-     */
-    public static decodeTokenId(req: Request, res: Response): string | undefined {
-        const { authorization } = req.headers;
-
-        if (!authorization) {
-            RouteResponse.unauthorizedError(res, 'Erro ao tentar logar');
-        } else {
-            const token = authorization.replace('Bearer', '').trim();
-            const data = jwt.verify(token, 'secret');
-            const { id } = data as ITokenPayload;
-            req.userId = id;
-            return id;
-        }
-        return undefined;
-    }
-
-    /**
      * acessPermission
      *
      * @returns Verifica se o usuário tem permissão de acesso.
      */
     public static accessPermission(req: Request, res: Response, next: NextFunction): void {
         const token = req.headers.authorization?.replace('Bearer', '').trim();
-        const id = AuthValidator.decodeTokenId(req, res);
+        const email = AuthValidator.decodeTokenEmail(req, res);
         const userRepository: UserRepository = new UserRepository();
         if (!token) RouteResponse.unauthorizedError(res);
-        else if (!id) RouteResponse.unauthorizedError(res);
+        else if (!email) RouteResponse.unauthorizedError(res);
         else {
             try {
                 jwt.verify(token, 'secret');
-                const user = userRepository.findById(id);
+                const user = userRepository.findByEmail(email);
                 if (user === undefined) RouteResponse.unauthorizedError(res);
                 next();
             } catch {

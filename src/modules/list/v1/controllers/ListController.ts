@@ -6,7 +6,7 @@ import { Request, Response } from 'express';
 import { BaseController } from '../../../../library';
 
 // Decorators
-import { Controller, Delete, Middlewares, Post, PublicRoute, Put, Get } from '../../../../decorators';
+import { Controller, Delete, Middlewares, Post, PublicRoute, Get } from '../../../../decorators';
 
 // Models
 import { EnumEndpoints } from '../../../../models';
@@ -102,26 +102,14 @@ export class ListController extends BaseController {
      *             example:
      *               familyMemberName: familyMemberName
      *               status: Em espera
-     *               listId: [1,2]
-     *               values: [10,-20]
-     *               activities: [ "id": "1", "id": "2"]
      *             required:
      *               - familyMemberName
      *               - status
-     *               - listId
-     *               - values
-     *               - activities
      *             properties:
      *               familyMemberName:
      *                 type: string
      *               status:
      *                 type: string
-     *               listId:
-     *                 type: number[]
-     *               values:
-     *                 type: number[]
-     *               activities:
-     *                 type: object
      *     responses:
      *       $ref: '#/components/responses/baseCreate'
      */
@@ -129,83 +117,14 @@ export class ListController extends BaseController {
     @PublicRoute()
     @Middlewares(AuthValidator.accessPermission, ListValidator.post())
     public async add(req: Request, res: Response): Promise<void> {
-        const { familyMemberName, status, listId, values, activities } = req.body;
-        const array = values.split(',');
-        let discount = 0;
-        array.forEach((element: string) => {
-            if (Number(element) < 0) discount += Number(element);
-        });
+        const { familyMemberName, status } = req.body;
         const newList: DeepPartial<List> = {
             familyMemberName,
-            discount,
-            status,
-            listId,
-            values,
-            activities
+            status
         };
 
         await new ListRepository().insert(newList);
         RouteResponse.successCreate(res);
-    }
-
-    /**
-     * @swagger
-     * /v1/list:
-     *   put:
-     *     summary: Altera uma Lista
-     *     tags: [List]
-     *     consumes:
-     *       - application/json
-     *     produces:
-     *       - application/json
-     *     security:
-     *       - BearerAuth: []
-     *     requestBody:
-     *       content:
-     *         application/json:
-     *           schema:
-     *             type: object
-     *             example:
-     *               id: idList
-     *               familyMemberName: familyMemberName
-     *               values: [10, 0, 15]
-     *               status: Em espera
-     *               activities: [ "id": "1", "id": "2"]
-     *             required:
-     *               - familyMemberName
-     *               - values
-     *               - status
-     *               - activities
-     *             properties:
-     *               familyMemberName:
-     *                 type: string
-     *               values:
-     *                 type: number[]
-     *               status:
-     *                 type: string
-     *               activities:
-     *                 type: object
-     *     responses:
-     *       $ref: '#/components/responses/baseEmpty'
-     */
-    @Put()
-    @PublicRoute()
-    @Middlewares(AuthValidator.accessPermission, ListValidator.put())
-    public async update(req: Request, res: Response): Promise<void> {
-        const { familyMemberName, values, status, activities, listRef } = req.body;
-        const discount = ListValidator.findDiscount(values);
-        const list: List = listRef;
-
-        list.familyMemberName = familyMemberName;
-        list.values = values;
-        list.discount = discount;
-        list.status = status;
-        list.activities = [];
-        await new ListRepository().update(list);
-        list.activities = activities;
-        await new ListRepository().update(list);
-
-        RouteResponse.successEmpty(res);
     }
 
     /**

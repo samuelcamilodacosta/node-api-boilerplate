@@ -1,10 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, CreateDateColumn, UpdateDateColumn, BeforeUpdate, BeforeInsert } from 'typeorm';
+import { Entity, ObjectID, ObjectIdColumn, Column, BaseEntity, CreateDateColumn, UpdateDateColumn, BeforeUpdate, BeforeInsert } from 'typeorm';
 import bcrypt from 'bcryptjs';
 
 @Entity()
 export class User extends BaseEntity {
-    @PrimaryGeneratedColumn() // Alterar para @PrimaryGeneratedColumn em caso de banco diferente do MongoDB
-    public id: number;
+    @ObjectIdColumn() // Alterar para @PrimaryGeneratedColumn em caso de banco diferente do MongoDB
+    public id: ObjectID;
 
     @Column({ unique: true })
     public email: string;

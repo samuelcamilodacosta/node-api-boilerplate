@@ -1,5 +1,5 @@
 import { ConnectionOptions } from 'typeorm';
-import { MysqlConnectionOptions } from 'typeorm/driver/mysql/MysqlConnectionOptions';
+import { MongoConnectionOptions } from 'typeorm/driver/mongodb/MongoConnectionOptions';
 
 // Opções genéricas
 const baseOptions: Omit<ConnectionOptions, 'type'> = {
@@ -15,14 +15,16 @@ const baseOptions: Omit<ConnectionOptions, 'type'> = {
     synchronize: true
 };
 
-// Opções para conexão com MySql
-const mysqlOptions: MysqlConnectionOptions = {
-    type: 'mysql',
-    url: process.env.MYSQL_CONNECTION_URL,
-    logging: false // Habilitar para visualizar as queries do banco
+// Opções para conexão com MongoDB
+const mongoOptions: MongoConnectionOptions = {
+    type: 'mongodb',
+    url: process.env.MONGO_CONNECTION_URL,
+    authSource: 'admin',
+    useUnifiedTopology: true,
+    useNewUrlParser: true
 };
 
 export const dbConfig = {
     ...baseOptions,
-    ...mysqlOptions
+    ...mongoOptions
 } as ConnectionOptions;

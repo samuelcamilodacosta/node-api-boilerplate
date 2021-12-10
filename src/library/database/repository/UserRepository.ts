@@ -1,5 +1,5 @@
 // Modules
-import { DeepPartial, DeleteResult, Repository } from 'typeorm';
+import { DeepPartial, DeleteResult, ObjectID, Repository } from 'typeorm';
 
 // Entities
 import { User } from '../entity';
@@ -54,7 +54,7 @@ export class UserRepository extends BaseRepository {
      *
      * @returns Resultado da remoção
      */
-    public delete(id: string): Promise<DeleteResult> {
+    public delete(id: ObjectID): Promise<DeleteResult> {
         return this.getConnection().getRepository(User).delete(id);
     }
 
@@ -80,7 +80,7 @@ export class UserRepository extends BaseRepository {
      *
      * @returns Usuário buscado
      */
-    public findById(id: string): Promise<User | undefined> {
+    public findById(id: ObjectID): Promise<User | undefined> {
         return this.getConnection().getRepository(User).findOne(id);
     }
 }

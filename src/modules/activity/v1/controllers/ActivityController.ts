@@ -79,11 +79,8 @@ export class ActivityController extends BaseController {
     @PublicRoute()
     @Middlewares(AuthValidator.accessPermission, ActivityValidator.onlyId())
     public async search(req: Request, res: Response): Promise<void> {
-        const id = parseInt(req.params.id, 10);
-        if (id) {
-            const data = await new ActivityRepository().findById(id);
-            RouteResponse.success(data, res);
-        }
+        const data = await new ActivityRepository().findById(req.params.id);
+        RouteResponse.success(data, res);
     }
 
     /**

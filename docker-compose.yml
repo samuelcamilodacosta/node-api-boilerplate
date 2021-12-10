@@ -10,32 +10,35 @@ services:
         environment:
             - NODE_ENV=development # Define o host, controla a exibição de logs e execução de migrations
             - PORT=8080
-            - MYSQL_CONNECTION_URL=mysql://riott_root:90e271d9b4ae4a6812e86cee@riott-mysql:3306
+            - MONGO_CONNECTION_URL=mongodb://riott_root:55a716fe3d2053ed61b16948@riott-mongo:27017
         networks:
             - riott-connect
         links:
-            - mysql
+            - mongo
         ports:
             - 4444:8080
 
-    mysql:
-        container_name: riott-mysql
+    # Banco com MongoDB
+    mongo:
+        container_name: riott-mongo
         restart: always
-        image: mysql:5.7
+        image: mongo
+        command: [--auth]
         volumes:
-        - ~/docker/volumes/RIOTT_Mysql:/var/lib/mysql
+            - ~/docker/volumes/RIOTT_MongoDB:/data/db
         environment:
-                MYSQL_DATABASE: riott-database
-                MYSQL_USER: riott_root
-                MYSQL_PASSWORD: 90e271d9b4ae4a6812e86cee
-                MYSQL_ROOT_PASSWORD: 327c56a1d1c5803d92a4dad9
+            MONGO_INITDB_ROOT_USERNAME: riott_root
+            MONGO_INITDB_ROOT_PASSWORD: 55a716fe3d2053ed61b16948
         networks:
             - riott-connect
         ports:
-            - 3306:3306
+            - 27017:27017
+        logging:
+            driver: none # Habilitar para visualizar as queries do banco
+
 volumes:
     riott-node-data:
-    riott-mysql-data:
+    riott-mongo-data:
 
 networks:
     riott-connect:

@@ -1,5 +1,7 @@
 // Modules
-import { DeepPartial, DeleteResult, Repository } from 'typeorm';
+import { IActivityValue } from 'models';
+import { DeepPartial, DeleteResult, ObjectID, Repository } from 'typeorm';
+import { ActivityRepository } from '.';
 
 // Entities
 import { List } from '../entity';
@@ -54,7 +56,7 @@ export class ListRepository extends BaseRepository {
      *
      * @returns Resultado da remoção
      */
-    public delete(id: string): Promise<DeleteResult> {
+    public delete(id: string | ObjectID): Promise<DeleteResult> {
         return this.getConnection().getRepository(List).delete(id);
     }
 
@@ -69,5 +71,60 @@ export class ListRepository extends BaseRepository {
      */
     public findById(id: string): Promise<List | undefined> {
         return this.getConnection().getRepository(List).findOne(id);
+    }
+
+    /**
+     * addActivity
+     *
+     * Adiciona uma atividade a lista
+     *
+     * @param id - ID da lista
+     * @param idActivity - ID da atividade adicionada
+     *
+     * @returns Atividade alterada
+     */
+    public async addActivity(id: string | ObjectID, idActivity: string, value: number): Promise<List | undefined> {
+        const list = await this.getConnection().getRepository(List).findOne(id);
+        const activity: IActivityValue | undefined = await new ActivityRepository().findOne(idActivity);
+        if (list && activity) {
+            activity.value = value;
+            activity.id = idActivity;
+            if (!list.activities) list.activities = new Array(activity);
+            else list.activities.push(activity);
+            await new ListRepository().delete(id);
+            return this.getConnection().getRepository(List).save(list);
+        }
+        return undefined;
+    }
+
+    /**
+     * deleteActivitiesFromLists
+     *
+     * Deleta atividades da lista
+     *
+     * @param id - ID da atividade
+     *
+     * @returns Listas alteradas
+     */
+    public async deleteActivitiesFromLists(id: string): Promise<List[]> {
+        const lists = await this.getConnection()
+            .getRepository(List)
+            .find({
+                where: {
+                    'activities.id': { $eq: id }
+                }
+            });
+        lists.forEach(list => {
+            const item = list.activities.filter(activity => activity.id !== id);
+            const upList = new List();
+            upList.id = list.id;
+            upList.activities = item;
+            upList.familyMemberName = list.familyMemberName;
+            upList.status = list.status;
+            this.update(upList);
+            return upList;
+        });
+
+        return lists;
     }
 }

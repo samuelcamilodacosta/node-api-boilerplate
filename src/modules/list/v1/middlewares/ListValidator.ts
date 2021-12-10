@@ -52,10 +52,6 @@ export class ListValidator extends BaseValidator {
                 }
             }
         },
-        discount: {
-            in: 'body',
-            errorMessage: 'Valor de desconto inválido.'
-        },
         status: {
             in: 'body',
             notEmpty: true,
@@ -64,6 +60,9 @@ export class ListValidator extends BaseValidator {
                 options: async (_: string, { req }) => {
                     let check = false;
                     switch (req.body.status) {
+                        case 'Em aberto':
+                            check = true;
+                            break;
                         case 'Em espera':
                             check = true;
                             break;
@@ -81,37 +80,15 @@ export class ListValidator extends BaseValidator {
                 }
             }
         },
-        listId: {
-            in: 'body',
-            isArray: true,
-            notEmpty: true,
-            errorMessage: 'Lista de IDs inválidos.',
-            customSanitizer: {
-                options: listId => {
-                    return listId.toString();
-                }
-            }
-        },
-        values: {
-            in: 'body',
-            isArray: true,
-            notEmpty: true,
-            errorMessage: 'Valores inválidos.',
-            customSanitizer: {
-                options: values => {
-                    return values.toString();
-                }
-            }
-        },
         unique: {
-            errorMessage: 'Esse usuário já possui uma lista em andamento',
+            errorMessage: 'Esse usuário já possui uma lista em aberto',
             custom: {
                 options: async (_: string, { req }) => {
                     let check = true;
                     const [rows] = await new ListRepository().list<List>(req.body.familyMemberName);
-                    if (req.body.status === 'Em andamento') {
+                    if (req.body.status === 'Em aberto') {
                         rows.forEach(element => {
-                            if (element.status === 'Em andamento') check = false;
+                            if (element.status === 'Em aberto') check = false;
                         });
                     }
 
@@ -151,14 +128,5 @@ export class ListValidator extends BaseValidator {
         return BaseValidator.validationList({
             id: ListValidator.model.id
         });
-    }
-
-    public static findDiscount(values: string): number {
-        const array = values.split(',');
-        let sum = 0;
-        array.forEach((element: string) => {
-            if (Number(element) < 0) sum += Number(element);
-        });
-        return sum;
     }
 }

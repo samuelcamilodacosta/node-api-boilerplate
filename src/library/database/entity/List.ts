@@ -1,29 +1,19 @@
-import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, CreateDateColumn, UpdateDateColumn, ManyToMany, JoinTable } from 'typeorm';
-import { Activity } from './Activity';
+import { Entity, ObjectIdColumn, ObjectID, Column, BaseEntity, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { IActivityValue } from '../../../models/IActivityValue';
 
 @Entity()
 export class List extends BaseEntity {
-    @PrimaryGeneratedColumn() // Alterar para @PrimaryGeneratedColumn em caso de banco diferente do MongoDB
-    public id: number;
+    @ObjectIdColumn() // Alterar para @PrimaryGeneratedColumn em caso de banco diferente do MongoDB
+    public id: ObjectID;
 
     @Column()
     public familyMemberName: string;
 
     @Column()
-    public discount: number;
-
-    @Column()
     public status: string;
 
     @Column()
-    public listId: string;
-
-    @Column()
-    public values: string;
-
-    @ManyToMany(() => Activity, { eager: true })
-    @JoinTable()
-    public activities: Activity[];
+    public activities: IActivityValue[];
 
     @CreateDateColumn()
     public createdAt: Date;

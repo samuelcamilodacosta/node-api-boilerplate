@@ -11,10 +11,11 @@ import { AuthController } from './modules/auth/v1';
 import { ActivityController } from './modules/activity/v1';
 import { ListController } from './modules/list/v1';
 import { MemberController } from './modules/member/v1';
+import { ListActivityController } from './modules/listActivity/v1';
 
 const app: App = new App({
     port: Number(process.env.PORT || 8080),
-    controllers: [UserController, ActivityController, ListController, MemberController, AuthController],
+    controllers: [UserController, ActivityController, ListController, MemberController, AuthController, ListActivityController],
     middlewares: [Logger.middleware],
     logger: new Logger(),
     swaggerOptions: process.env.NODE_ENV === 'development' ? swaggerConfig : undefined,

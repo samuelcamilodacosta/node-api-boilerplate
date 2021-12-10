@@ -1,9 +1,9 @@
-import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, ObjectID, ObjectIdColumn, Column, BaseEntity, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
 @Entity()
 export class Member extends BaseEntity {
-    @PrimaryGeneratedColumn() // Alterar para @PrimaryGeneratedColumn em caso de banco diferente do MongoDB
-    public id: number;
+    @ObjectIdColumn() // Alterar para @PrimaryGeneratedColumn em caso de banco diferente do MongoDB
+    public id: ObjectID;
 
     @Column({ unique: true })
     public name: string;

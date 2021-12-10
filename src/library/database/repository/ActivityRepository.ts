@@ -80,7 +80,7 @@ export class ActivityRepository extends BaseRepository {
      *
      * @returns Atividade procurada
      */
-    public findById(id: number | undefined): Promise<Activity | undefined> {
+    public findById(id: string): Promise<Activity | undefined> {
         return this.getConnection().getRepository(Activity).findOne(id);
     }
 }

@@ -104,16 +104,17 @@ export class UserController extends BaseController {
     @PublicRoute()
     @Middlewares(AuthValidator.accessPermission, UserValidator.put())
     public async update(req: Request, res: Response): Promise<void> {
-        const user: User = new User();
-        const id = AuthValidator.decodeTokenId(req, res);
+        const newUser: User = new User();
         const email = AuthValidator.decodeTokenEmail(req, res);
-        if (id) user.id = parseInt(id, 10);
-        if (email) user.email = email;
-        user.password = req.body.password;
-
-        await new UserRepository().update(user);
-
-        RouteResponse.successEmpty(res);
+        const userRepository: UserRepository = new UserRepository();
+        if (email) {
+            const user = await userRepository.findByEmail(email);
+            if (user) newUser.id = user.id;
+            if (email) newUser.email = email;
+            newUser.password = req.body.password;
+            await new UserRepository().update(newUser);
+            RouteResponse.successEmpty(res);
+        }
     }
 
     /**
@@ -135,12 +136,16 @@ export class UserController extends BaseController {
     @PublicRoute()
     @Middlewares(AuthValidator.accessPermission, UserValidator.onlyId())
     public async remove(req: Request, res: Response): Promise<void> {
-        const id = AuthValidator.decodeTokenId(req, res);
-        if (id) {
-            await new UserRepository().delete(id);
-            RouteResponse.success('Usuário deletado.', res);
-        } else {
-            RouteResponse.unauthorizedError(res, 'Erro ao deletar, dados inválidos.');
+        const email = AuthValidator.decodeTokenEmail(req, res);
+        const userRepository: UserRepository = new UserRepository();
+        if (email) {
+            const user = await userRepository.findByEmail(email);
+            if (user) {
+                await new UserRepository().delete(user.id);
+                RouteResponse.success('Usuário deletado.', res);
+            } else {
+                RouteResponse.unauthorizedError(res, 'Erro ao deletar, dados inválidos.');
+            }
         }
     }
 }
