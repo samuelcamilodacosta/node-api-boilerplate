@@ -90,7 +90,7 @@ export class RelationController extends BaseController {
     @PublicRoute()
     @Middlewares(AuthValidator.accessPermission, RelationValidator.validatorActivity())
     public async remove(req: Request, res: Response): Promise<void> {
-        const lists = await new ListRepository().deleteActivitiesFromLists(req.params.id);
-        RouteResponse.success(lists, res);
+        await new ListRepository().deleteActivitiesFromLists(req.params.id);
+        RouteResponse.successEmpty(res);
     }
 }

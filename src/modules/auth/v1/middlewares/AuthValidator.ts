@@ -29,9 +29,7 @@ export class AuthValidator extends BaseValidator {
      */
     public static tokenValidate(req: Request, res: Response, next: NextFunction): void {
         const { authorization } = req.headers;
-        if (!authorization) {
-            RouteResponse.unauthorizedError(res);
-        } else {
+        if (authorization) {
             try {
                 const token = authorization.replace('Bearer', '').trim();
                 const data = jwt.verify(token, 'secret');
@@ -41,6 +39,8 @@ export class AuthValidator extends BaseValidator {
             } catch {
                 RouteResponse.unauthorizedError(res);
             }
+        } else {
+            RouteResponse.unauthorizedError(res);
         }
     }
 
@@ -49,18 +49,16 @@ export class AuthValidator extends BaseValidator {
      *
      * @returns Decodifica o token retornando o e-mail
      */
-    public static decodeTokenEmail(req: Request, res: Response): string | undefined {
+    public static decodeTokenEmail(req: Request, res: Response): string | void {
         const { authorization } = req.headers;
-        if (!authorization) {
-            RouteResponse.unauthorizedError(res, 'Erro ao tentar logar');
-        } else {
+        if (authorization) {
             const token = authorization.replace('Bearer', '').trim();
             const data = jwt.verify(token, 'secret');
             const { email } = data as ITokenPayload;
             req.userEmail = email;
             return email;
         }
-        return undefined;
+        return RouteResponse.unauthorizedError(res, 'Erro ao tentar logar');
     }
 
     /**
@@ -72,8 +70,7 @@ export class AuthValidator extends BaseValidator {
         const token = req.headers.authorization?.replace('Bearer', '').trim();
         const email = AuthValidator.decodeTokenEmail(req, res);
         const userRepository: UserRepository = new UserRepository();
-        if (!token) RouteResponse.unauthorizedError(res);
-        else if (!email) RouteResponse.unauthorizedError(res);
+        if (!token || !email) RouteResponse.unauthorizedError(res);
         else {
             try {
                 jwt.verify(token, 'secret');
@@ -92,9 +89,6 @@ export class AuthValidator extends BaseValidator {
      * @returns Lista de validadores
      */
     public static login(): RequestHandler[] {
-        return UserValidator.validationList({
-            email: UserValidator.model.email,
-            password: UserValidator.model.password
-        });
+        return UserValidator.validationList({ email: UserValidator.model.email, password: UserValidator.model.password });
     }
 }

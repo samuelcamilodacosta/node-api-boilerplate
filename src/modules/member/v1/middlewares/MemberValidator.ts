@@ -95,10 +95,7 @@ export class MemberValidator extends BaseValidator {
      * @returns Lista de validadores
      */
     public static put(): RequestHandler[] {
-        return MemberValidator.validationList({
-            id: MemberValidator.model.id,
-            ...MemberValidator.model
-        });
+        return MemberValidator.validationList({ id: MemberValidator.model.id, ...MemberValidator.model });
     }
 
     /**
@@ -107,8 +104,6 @@ export class MemberValidator extends BaseValidator {
      * @returns Lista de validadores
      */
     public static onlyId(): RequestHandler[] {
-        return BaseValidator.validationList({
-            id: MemberValidator.model.id
-        });
+        return BaseValidator.validationList({ id: MemberValidator.model.id });
     }
 }

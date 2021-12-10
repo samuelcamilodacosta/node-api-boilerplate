@@ -94,8 +94,6 @@ export class RelationValidator extends BaseValidator {
      * @returns Lista de validadores
      */
     public static validatorActivity(): RequestHandler[] {
-        return BaseValidator.validationList({
-            idActivity: RelationValidator.model.idActivity
-        });
+        return BaseValidator.validationList({ idActivity: RelationValidator.model.idActivity });
     }
 }
