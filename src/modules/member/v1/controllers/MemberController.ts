@@ -23,7 +23,6 @@ import { MemberRepository } from '../../../../library/database/repository';
 // Validators
 import { MemberValidator } from '../middlewares/MemberValidator';
 import { AuthValidator } from '../../../auth/v1';
-import { upload } from '../middlewares/ImageValidator';
 
 @Controller(EnumEndpoints.MEMBER)
 export class MemberController extends BaseController {
@@ -90,12 +89,10 @@ export class MemberController extends BaseController {
     @PublicRoute()
     @Middlewares(AuthValidator.accessPermission, MemberValidator.post())
     public async add(req: Request, res: Response): Promise<void> {
-        const { name, birthDate, allowanceValue } = req.body;
-
         const newUser: DeepPartial<Member> = {
-            name,
-            birthDate,
-            allowanceValue
+            name: req.body.name,
+            birthDate: req.body.birthDate,
+            allowanceValue: req.body.allowanceValue
         };
         await new MemberRepository().insert(newUser);
         RouteResponse.successCreate(res);
@@ -144,15 +141,11 @@ export class MemberController extends BaseController {
     @PublicRoute()
     @Middlewares(AuthValidator.accessPermission, MemberValidator.put())
     public async update(req: Request, res: Response): Promise<void> {
-        const { name, birthDate, allowanceValue, memberRef } = req.body;
-        const member: Member = memberRef;
-
-        member.name = name;
-        member.birthDate = birthDate;
-        member.allowanceValue = allowanceValue;
-
+        const member: Member = req.body.memberRef;
+        member.name = req.body.name;
+        member.birthDate = req.body.birthDate;
+        member.allowanceValue = req.body.allowanceValue;
         await new MemberRepository().update(member);
-
         RouteResponse.successEmpty(res);
     }
 
@@ -182,7 +175,6 @@ export class MemberController extends BaseController {
     @Middlewares(AuthValidator.accessPermission, MemberValidator.onlyId())
     public async remove(req: Request, res: Response): Promise<void> {
         await new MemberRepository().delete(req.params.id);
-
         RouteResponse.success(req.params.id, res);
     }
 }
