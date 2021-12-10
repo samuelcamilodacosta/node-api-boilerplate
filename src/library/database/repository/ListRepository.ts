@@ -111,6 +111,7 @@ export class ListRepository extends BaseRepository {
             .getRepository(List)
             .find({
                 where: {
+                    status: { $not: { $eq: 'Encerrada' } },
                     'activities.id': { $eq: id }
                 }
             });

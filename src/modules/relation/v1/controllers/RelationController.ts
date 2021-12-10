@@ -18,9 +18,10 @@ import { ListRepository } from '../../../../library/database/repository';
 
 // Validators
 import { AuthValidator } from '../../../auth/v1';
+import { RelationValidator } from '../middlewares/RelationValidator';
 
 @Controller(EnumEndpoints.RELATION)
-export class ListActivityController extends BaseController {
+export class RelationController extends BaseController {
     /**
      * @swagger
      * /v1/relation:
@@ -58,7 +59,7 @@ export class ListActivityController extends BaseController {
      */
     @Post()
     @PublicRoute()
-    @Middlewares(AuthValidator.accessPermission)
+    @Middlewares(AuthValidator.accessPermission, RelationValidator.post())
     public async addActivity(req: Request, res: Response): Promise<void> {
         await new ListRepository().addActivity(req.body.id, req.body.idActivity, req.body.value);
         RouteResponse.successEmpty(res);
@@ -87,10 +88,9 @@ export class ListActivityController extends BaseController {
      */
     @Delete('/:id')
     @PublicRoute()
-    @Middlewares(AuthValidator.accessPermission)
+    @Middlewares(AuthValidator.accessPermission, RelationValidator.validatorActivity())
     public async remove(req: Request, res: Response): Promise<void> {
         const lists = await new ListRepository().deleteActivitiesFromLists(req.params.id);
-
         RouteResponse.success(lists, res);
     }
 }
