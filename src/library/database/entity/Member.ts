@@ -5,6 +5,15 @@ export class Member extends BaseEntity {
     @ObjectIdColumn()
     public id: ObjectID;
 
+    @Column({ unique: true })
+    public name: string;
+
+    @Column()
+    public birthDate: string;
+
+    @Column({ type: 'float' })
+    public allowanceValue: number;
+
     @Column()
     public createdAt: Date;
 
@@ -21,13 +30,4 @@ export class Member extends BaseEntity {
     public setUpdateDate(): void {
         this.updatedAt = new Date();
     }
-
-    @Column({ unique: true })
-    public name: string;
-
-    @Column()
-    public birthDate: string;
-
-    @Column({ type: 'float' })
-    public allowanceValue: number;
 }

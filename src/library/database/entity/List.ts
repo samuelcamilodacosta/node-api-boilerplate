@@ -7,6 +7,15 @@ export class List extends BaseEntity {
     public id: ObjectID;
 
     @Column()
+    public familyMemberName: string;
+
+    @Column()
+    public status: string;
+
+    @Column()
+    public activities: IActivityValue[];
+
+    @Column()
     public createdAt: Date;
 
     @Column()
@@ -22,13 +31,4 @@ export class List extends BaseEntity {
     public setUpdateDate(): void {
         this.updatedAt = new Date();
     }
-
-    @Column()
-    public familyMemberName: string;
-
-    @Column()
-    public status: string;
-
-    @Column()
-    public activities: IActivityValue[];
 }

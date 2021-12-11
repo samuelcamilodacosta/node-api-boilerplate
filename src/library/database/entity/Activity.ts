@@ -6,6 +6,9 @@ export class Activity extends BaseEntity {
     public id: ObjectID;
 
     @Column()
+    public description: string;
+
+    @Column()
     public createdAt: Date;
 
     @Column()
@@ -21,7 +24,4 @@ export class Activity extends BaseEntity {
     public setUpdateDate(): void {
         this.updatedAt = new Date();
     }
-
-    @Column()
-    public description: string;
 }

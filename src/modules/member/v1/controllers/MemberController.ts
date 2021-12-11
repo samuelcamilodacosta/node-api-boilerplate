@@ -61,7 +61,7 @@ export class MemberController extends BaseController {
      *     summary: Cadastra um membro da família.
      *     tags: [Member]
      *     consumes:
-     *       - application/json
+     *       - multipart/form-data
      *     produces:
      *       - application/json
      *     security:

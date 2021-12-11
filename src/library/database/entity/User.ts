@@ -6,6 +6,18 @@ export class User extends BaseEntity {
     @ObjectIdColumn()
     public id: ObjectID;
 
+    @Column({ unique: true })
+    public email: string;
+
+    @Column()
+    public password: string;
+
+    @BeforeInsert()
+    @BeforeUpdate()
+    hashPassword(): void {
+        this.password = bcrypt.hashSync(this.password, 8);
+    }
+
     @Column()
     public createdAt: Date;
 
@@ -21,17 +33,5 @@ export class User extends BaseEntity {
     @BeforeUpdate()
     public setUpdateDate(): void {
         this.updatedAt = new Date();
-    }
-
-    @Column({ unique: true })
-    public email: string;
-
-    @Column()
-    public password: string;
-
-    @BeforeInsert()
-    @BeforeUpdate()
-    hashPassword(): void {
-        this.password = bcrypt.hashSync(this.password, 8);
     }
 }

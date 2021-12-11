@@ -61,7 +61,7 @@ export class MemberValidator extends BaseValidator {
             errorMessage: 'Mesada inválida',
             custom: {
                 options: value => {
-                    return parseFloat(value.toFixed(2));
+                    return parseFloat(Number(value).toFixed(2));
                 }
             }
         },
