@@ -21,7 +21,7 @@
  *       name: order
  *       description: Chave para ordenar
  *       schema:
- *         type: integer
+ *         type: string
  *     listOrderByRef:
  *       in: query
  *       name: orderBy
