@@ -50,6 +50,7 @@ export class ActivityController extends BaseController {
     @Middlewares(AuthValidator.accessPermission)
     public async getAll(req: Request, res: Response): Promise<void> {
         const [rows, count] = await new ActivityRepository().list<Activity>(ActivityController.listParams(req));
+
         RouteResponse.success({ rows, count }, res);
     }
 
@@ -113,6 +114,7 @@ export class ActivityController extends BaseController {
     @Middlewares(AuthValidator.accessPermission, ActivityValidator.post())
     public async add(req: Request, res: Response): Promise<void> {
         await new ActivityRepository().insert(req.body.description);
+
         RouteResponse.successCreate(res);
     }
 
@@ -153,7 +155,9 @@ export class ActivityController extends BaseController {
     public async update(req: Request, res: Response): Promise<void> {
         const activity: Activity = req.body.activityRef;
         activity.description = req.body.description;
+
         await new ActivityRepository().update(activity);
+
         RouteResponse.successEmpty(res);
     }
 
@@ -183,6 +187,7 @@ export class ActivityController extends BaseController {
     @Middlewares(AuthValidator.accessPermission, ActivityValidator.onlyId())
     public async remove(req: Request, res: Response): Promise<void> {
         await new ActivityRepository().delete(req.params.id);
-        RouteResponse.success(req.params.id, res);
+
+        RouteResponse.successEmpty(res);
     }
 }

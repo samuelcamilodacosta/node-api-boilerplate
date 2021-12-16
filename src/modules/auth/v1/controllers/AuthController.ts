@@ -52,7 +52,9 @@ export class AuthController extends BaseController {
     @Middlewares(AuthValidator.login())
     public async authenticate(req: Request, res: Response): Promise<void> {
         const token = await new UserRepository().authenticateUser(req.body.email, req.body.password);
+
         if (token) RouteResponse.success(token, res);
+
         RouteResponse.unauthorizedError(res, 'Erro ao tentar logar');
     }
 

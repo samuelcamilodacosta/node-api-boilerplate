@@ -52,6 +52,7 @@ export class MemberController extends BaseController {
     @Middlewares(AuthValidator.accessPermission)
     public async getAll(req: Request, res: Response): Promise<void> {
         const [rows, count] = await new MemberRepository().list<Member>(MemberController.listParams(req));
+
         RouteResponse.success({ rows, count }, res);
     }
 
@@ -98,14 +99,18 @@ export class MemberController extends BaseController {
     @Middlewares(AuthValidator.accessPermission, MemberValidator.post())
     public async add(req: Request, res: Response): Promise<void> {
         const photo: string | undefined = FileUtils.savePhoto(req, res);
+
         if (!photo) RouteResponse.error('Image not found', res);
+
         const newUser: DeepPartial<Member> = {
             name: req.body.name,
             photo,
             birthDate: req.body.birthDate,
             allowanceValue: req.body.allowanceValue
         };
+
         await new MemberRepository().insert(newUser);
+
         RouteResponse.successCreate(res);
     }
 
@@ -157,17 +162,23 @@ export class MemberController extends BaseController {
     @Middlewares(AuthValidator.accessPermission, MemberValidator.put())
     public async update(req: Request, res: Response): Promise<void> {
         const photo: string | undefined = FileUtils.savePhoto(req, res);
+
         if (photo) {
             const newMember: Member = req.body.memberRef;
+
             const member = await new MemberRepository().findById(req.body.id);
             if (member) FileUtils.deletePhoto(member.photo);
+
             newMember.name = req.body.name;
             newMember.photo = photo;
             newMember.birthDate = req.body.birthDate;
             newMember.allowanceValue = req.body.allowanceValue;
+
             await new MemberRepository().update(newMember);
+
             RouteResponse.successEmpty(res);
         }
+
         RouteResponse.error('Image not upload', res);
     }
 
@@ -197,8 +208,11 @@ export class MemberController extends BaseController {
     @Middlewares(AuthValidator.accessPermission, MemberValidator.onlyId())
     public async remove(req: Request, res: Response): Promise<void> {
         const member = await new MemberRepository().findById(req.params.id);
+
         if (member) FileUtils.deletePhoto(member.photo);
+
         await new MemberRepository().delete(req.params.id);
+
         RouteResponse.success(req.params.id, res);
     }
 }

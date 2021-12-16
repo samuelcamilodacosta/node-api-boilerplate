@@ -79,6 +79,7 @@ export class ListController extends BaseController {
     @Middlewares(AuthValidator.accessPermission)
     public async getAll(req: Request, res: Response): Promise<void> {
         const [rows, count] = await new ListRepository().list<List>(ListController.listParams(req));
+
         RouteResponse.success({ rows, count }, res);
     }
 
@@ -121,7 +122,9 @@ export class ListController extends BaseController {
             familyMemberName: req.body.familyMemberName,
             status: req.body.status
         };
+
         await new ListRepository().insert(newList);
+
         RouteResponse.successCreate(res);
     }
 
@@ -151,6 +154,7 @@ export class ListController extends BaseController {
     @Middlewares(AuthValidator.accessPermission, ListValidator.onlyId())
     public async remove(req: Request, res: Response): Promise<void> {
         await new ListRepository().delete(req.params.id);
+
         RouteResponse.success(req.params.id, res);
     }
 }

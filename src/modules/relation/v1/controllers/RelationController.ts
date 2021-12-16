@@ -62,6 +62,7 @@ export class RelationController extends BaseController {
     @Middlewares(AuthValidator.accessPermission, RelationValidator.post())
     public async addActivity(req: Request, res: Response): Promise<void> {
         await new ListRepository().addActivity(req.body.id, req.body.idActivity, req.body.value);
+
         RouteResponse.successEmpty(res);
     }
 
@@ -103,12 +104,16 @@ export class RelationController extends BaseController {
     @Middlewares(AuthValidator.accessPermission, RelationValidator.onlyId)
     public async removeActivityFromSpecificList(req: Request, res: Response): Promise<void> {
         const list = await new ListRepository().findById(req.params.idList);
+
         if (list) {
             const activities = new ListRepository().filterActivitiesById(list, req.body.idActivity);
             list.activities = activities;
+
             await new ListRepository().update(list);
+
             RouteResponse.successEmpty(res);
         }
+
         RouteResponse.error("Can't remove activity of this list", res);
     }
 
@@ -138,7 +143,9 @@ export class RelationController extends BaseController {
     @Middlewares(AuthValidator.accessPermission, RelationValidator.validatorActivity())
     public async removeActivityFromAllLists(req: Request, res: Response): Promise<void> {
         const lists = await new ListRepository().findListsWithActivityId(req.params.id);
+
         new ListRepository().deleteActivityFromLists(lists, req.params.id);
+
         RouteResponse.successEmpty(res);
     }
 }
