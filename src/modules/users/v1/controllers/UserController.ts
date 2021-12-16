@@ -107,12 +107,16 @@ export class UserController extends BaseController {
         const newUser: User = new User();
         const email = AuthValidator.decodeTokenEmail(req, res);
         const userRepository: UserRepository = new UserRepository();
+
         if (email) {
             const user = await userRepository.findByEmail(email);
+
             if (user) newUser.id = user.id;
-            if (email) newUser.email = email;
+            newUser.email = email;
             newUser.password = req.body.password;
+
             await new UserRepository().update(newUser);
+
             RouteResponse.successEmpty(res);
         }
     }
@@ -138,14 +142,14 @@ export class UserController extends BaseController {
     public async remove(req: Request, res: Response): Promise<void> {
         const email = AuthValidator.decodeTokenEmail(req, res);
         const userRepository: UserRepository = new UserRepository();
+
         if (email) {
             const user = await userRepository.findByEmail(email);
             if (user) {
                 await new UserRepository().delete(user.id);
                 RouteResponse.success('Usuário deletado.', res);
-            } else {
-                RouteResponse.unauthorizedError(res, 'Erro ao deletar, dados inválidos.');
             }
         }
+        RouteResponse.error('Erro ao deletar, dados inválidos.', res);
     }
 }
