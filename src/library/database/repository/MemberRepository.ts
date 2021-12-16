@@ -1,5 +1,5 @@
 // Modules
-import { DeepPartial, DeleteResult, Repository } from 'typeorm';
+import { DeepPartial, DeleteResult, ObjectID, Repository } from 'typeorm';
 
 // Entities
 import { Member } from '../entity';
@@ -56,6 +56,19 @@ export class MemberRepository extends BaseRepository {
      */
     public delete(id: string): Promise<DeleteResult> {
         return this.getConnection().getRepository(Member).delete(id);
+    }
+
+    /**
+     * findById
+     *
+     * Busca um membro da família pelo ID
+     *
+     * @param id - ID do membro da família
+     *
+     * @returns Dados do membro buscado
+     */
+    public findById(id: string | ObjectID): Promise<Member | undefined> {
+        return this.getConnection().getRepository(Member).findOne(id);
     }
 
     /**

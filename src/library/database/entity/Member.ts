@@ -15,6 +15,9 @@ export class Member extends BaseEntity {
     public allowanceValue: number;
 
     @Column()
+    public photo: string;
+
+    @Column()
     public createdAt: Date;
 
     @Column()

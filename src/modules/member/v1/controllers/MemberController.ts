@@ -4,6 +4,7 @@ import { Request, Response } from 'express';
 
 // Library
 import { BaseController } from '../../../../library';
+import { FileUtils } from '../../../../utils';
 
 // Decorators
 import { Controller, Delete, Middlewares, Post, PublicRoute, Put, Get } from '../../../../decorators';
@@ -73,15 +74,22 @@ export class MemberController extends BaseController {
      *             type: object
      *             required:
      *               - name
+     *               - photo
      *               - birthDate
      *               - allowanceValue
      *             properties:
      *               name:
      *                 type: string
+     *               photo:
+     *                 type: string
+     *                 format: base64
      *               birthDate:
      *                 type: string
      *               allowanceValue:
      *                 type: number
+     *             encoding:
+     *               photo:
+     *                 contentType: image/png, image/jpeg
      *     responses:
      *       $ref: '#/components/responses/baseCreate'
      */
@@ -89,8 +97,11 @@ export class MemberController extends BaseController {
     @PublicRoute()
     @Middlewares(AuthValidator.accessPermission, MemberValidator.post())
     public async add(req: Request, res: Response): Promise<void> {
+        const photo: string | undefined = FileUtils.savePhoto(req, res);
+        if (!photo) RouteResponse.error('Image not found', res);
         const newUser: DeepPartial<Member> = {
             name: req.body.name,
+            photo,
             birthDate: req.body.birthDate,
             allowanceValue: req.body.allowanceValue
         };
@@ -105,14 +116,14 @@ export class MemberController extends BaseController {
      *     summary: Altera um membro da família.
      *     tags: [Member]
      *     consumes:
-     *       - application/json
+     *       - multipart/form-data:
      *     produces:
      *       - application/json
      *     security:
      *       - BearerAuth: []
      *     requestBody:
      *       content:
-     *         application/json:
+     *         multipart/form-data::
      *           schema:
      *             type: object
      *             example:
@@ -123,6 +134,7 @@ export class MemberController extends BaseController {
      *             required:
      *               - id
      *               - name
+     *               - photo
      *               - birthDate
      *               - allowanceValue
      *             properties:
@@ -130,6 +142,9 @@ export class MemberController extends BaseController {
      *                 type: string
      *               name:
      *                 type: string
+     *               photo:
+     *                 type: string
+     *                 format: base64
      *               birthDate:
      *                 type: string
      *               allowanceValue:
@@ -141,12 +156,19 @@ export class MemberController extends BaseController {
     @PublicRoute()
     @Middlewares(AuthValidator.accessPermission, MemberValidator.put())
     public async update(req: Request, res: Response): Promise<void> {
-        const member: Member = req.body.memberRef;
-        member.name = req.body.name;
-        member.birthDate = req.body.birthDate;
-        member.allowanceValue = req.body.allowanceValue;
-        await new MemberRepository().update(member);
-        RouteResponse.successEmpty(res);
+        const photo: string | undefined = FileUtils.savePhoto(req, res);
+        if (photo) {
+            const newMember: Member = req.body.memberRef;
+            const member = await new MemberRepository().findById(req.body.id);
+            if (member) FileUtils.deletePhoto(member.photo);
+            newMember.name = req.body.name;
+            newMember.photo = photo;
+            newMember.birthDate = req.body.birthDate;
+            newMember.allowanceValue = req.body.allowanceValue;
+            await new MemberRepository().update(newMember);
+            RouteResponse.successEmpty(res);
+        }
+        RouteResponse.error('Image not upload', res);
     }
 
     /**
@@ -174,6 +196,8 @@ export class MemberController extends BaseController {
     @PublicRoute()
     @Middlewares(AuthValidator.accessPermission, MemberValidator.onlyId())
     public async remove(req: Request, res: Response): Promise<void> {
+        const member = await new MemberRepository().findById(req.params.id);
+        if (member) FileUtils.deletePhoto(member.photo);
         await new MemberRepository().delete(req.params.id);
         RouteResponse.success(req.params.id, res);
     }
