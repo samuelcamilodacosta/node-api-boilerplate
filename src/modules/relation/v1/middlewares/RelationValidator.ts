@@ -13,7 +13,7 @@ import { BaseValidator } from '../../../../library/BaseValidator';
 import { List, Activity } from '../../../../library/database/entity';
 
 /**
- * ListValidator
+ * RelationValidator
  *
  * Classe de validadores para o endpoint da lista
  */
