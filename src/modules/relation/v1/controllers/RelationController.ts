@@ -26,7 +26,7 @@ export class RelationController extends BaseController {
      * @swagger
      * /v1/relation:
      *   post:
-     *     summary: Adiciona atividades a lista
+     *     summary: Adiciona atividades a uma lista específica
      *     tags: [List Activity]
      *     consumes:
      *       - application/json
@@ -60,7 +60,7 @@ export class RelationController extends BaseController {
     @Post()
     @PublicRoute()
     @Middlewares(AuthValidator.accessPermission, RelationValidator.post())
-    public async addActivity(req: Request, res: Response): Promise<void> {
+    public async addActivityIntoList(req: Request, res: Response): Promise<void> {
         await new ListRepository().addActivity(req.body.id, req.body.idActivity, req.body.value);
 
         RouteResponse.successEmpty(res);

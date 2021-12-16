@@ -97,7 +97,7 @@ export class MemberController extends BaseController {
     @Post()
     @PublicRoute()
     @Middlewares(AuthValidator.accessPermission, MemberValidator.post())
-    public async add(req: Request, res: Response): Promise<void> {
+    public async registerMember(req: Request, res: Response): Promise<void> {
         const photo: string | undefined = FileUtils.savePhoto(req, res);
 
         if (!photo) RouteResponse.error('Image not found', res);
@@ -160,7 +160,7 @@ export class MemberController extends BaseController {
     @Put()
     @PublicRoute()
     @Middlewares(AuthValidator.accessPermission, MemberValidator.put())
-    public async update(req: Request, res: Response): Promise<void> {
+    public async updateMember(req: Request, res: Response): Promise<void> {
         const photo: string | undefined = FileUtils.savePhoto(req, res);
 
         if (photo) {
@@ -206,7 +206,7 @@ export class MemberController extends BaseController {
     @Delete('/:id')
     @PublicRoute()
     @Middlewares(AuthValidator.accessPermission, MemberValidator.onlyId())
-    public async remove(req: Request, res: Response): Promise<void> {
+    public async deleteMember(req: Request, res: Response): Promise<void> {
         const member = await new MemberRepository().findById(req.params.id);
 
         if (member) FileUtils.deletePhoto(member.photo);

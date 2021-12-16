@@ -6,7 +6,7 @@ import { Request, Response } from 'express';
 import { BaseController } from '../../../../library';
 
 // Decorators
-import { Controller, Delete, Middlewares, Post, PublicRoute, Put } from '../../../../decorators';
+import { Controller, Delete, Middlewares, Patch, Post, PublicRoute } from '../../../../decorators';
 
 // Models
 import { EnumEndpoints } from '../../../../models';
@@ -58,7 +58,7 @@ export class UserController extends BaseController {
     @Post()
     @PublicRoute()
     @Middlewares(UserValidator.post())
-    public async add(req: Request, res: Response): Promise<void> {
+    public async createUser(req: Request, res: Response): Promise<void> {
         const newUser: DeepPartial<User> = {
             email: req.body.email,
             password: req.body.password
@@ -72,7 +72,7 @@ export class UserController extends BaseController {
     /**
      * @swagger
      * /v1/user:
-     *   put:
+     *   patch:
      *     summary: Cadastrar nova senha (responsável)
      *     tags: [Users]
      *     consumes:
@@ -100,10 +100,10 @@ export class UserController extends BaseController {
      *     responses:
      *       $ref: '#/components/responses/baseEmpty'
      */
-    @Put()
+    @Patch()
     @PublicRoute()
     @Middlewares(AuthValidator.accessPermission, UserValidator.put())
-    public async update(req: Request, res: Response): Promise<void> {
+    public async registerNewPassword(req: Request, res: Response): Promise<void> {
         const newUser: User = new User();
         const email = AuthValidator.decodeTokenEmail(req, res);
         const userRepository: UserRepository = new UserRepository();
@@ -139,7 +139,7 @@ export class UserController extends BaseController {
     @Delete()
     @PublicRoute()
     @Middlewares(AuthValidator.accessPermission, UserValidator.onlyId())
-    public async remove(req: Request, res: Response): Promise<void> {
+    public async deleteUser(req: Request, res: Response): Promise<void> {
         const email = AuthValidator.decodeTokenEmail(req, res);
         const userRepository: UserRepository = new UserRepository();
 

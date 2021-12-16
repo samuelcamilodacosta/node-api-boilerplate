@@ -77,7 +77,7 @@ export class ListController extends BaseController {
     @Get()
     @PublicRoute()
     @Middlewares(AuthValidator.accessPermission)
-    public async getAll(req: Request, res: Response): Promise<void> {
+    public async getAllList(req: Request, res: Response): Promise<void> {
         const [rows, count] = await new ListRepository().list<List>(ListController.listParams(req));
 
         RouteResponse.success({ rows, count }, res);
@@ -117,7 +117,7 @@ export class ListController extends BaseController {
     @Post()
     @PublicRoute()
     @Middlewares(AuthValidator.accessPermission, ListValidator.post())
-    public async add(req: Request, res: Response): Promise<void> {
+    public async registerList(req: Request, res: Response): Promise<void> {
         const newList: DeepPartial<List> = {
             familyMemberName: req.body.familyMemberName,
             status: req.body.status
@@ -152,7 +152,7 @@ export class ListController extends BaseController {
     @Delete('/:id')
     @PublicRoute()
     @Middlewares(AuthValidator.accessPermission, ListValidator.onlyId())
-    public async remove(req: Request, res: Response): Promise<void> {
+    public async deleteList(req: Request, res: Response): Promise<void> {
         await new ListRepository().delete(req.params.id);
 
         RouteResponse.success(req.params.id, res);
