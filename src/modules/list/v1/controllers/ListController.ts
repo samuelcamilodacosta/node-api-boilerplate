@@ -132,7 +132,7 @@ export class ListController extends BaseController {
      * @swagger
      * /v1/list/{id}:
      *   patch:
-     *     summary: Atualiza status de uma lista
+     *     summary: Atualiza status de uma Lista
      *     tags: [List]
      *     consumes:
      *       - application/json
@@ -146,6 +146,18 @@ export class ListController extends BaseController {
      *         schema:
      *           type: string
      *         required: true
+     *     requestBody:
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             example:
+     *               status: Encerrada
+     *             required:
+     *               - status
+     *             properties:
+     *               status:
+     *                 type: string
      *     responses:
      *       $ref: '#/components/responses/baseResponse'
      */
