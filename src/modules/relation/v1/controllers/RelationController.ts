@@ -5,7 +5,7 @@ import { Request, Response } from 'express';
 import { BaseController } from '../../../../library';
 
 // Decorators
-import { Controller, Delete, Middlewares, Post, PublicRoute } from '../../../../decorators';
+import { Controller, Delete, Middlewares, Patch, Post, PublicRoute } from '../../../../decorators';
 
 // Models
 import { EnumEndpoints } from '../../../../models';
@@ -67,6 +67,53 @@ export class RelationController extends BaseController {
 
     /**
      * @swagger
+     * /v1/relation/{idList}:
+     *   patch:
+     *     summary: Apaga uma atividade de uma lista específica
+     *     tags: [List Activity]
+     *     consumes:
+     *       - application/json
+     *     produces:
+     *       - application/json
+     *     security:
+     *       - BearerAuth: []
+     *     parameters:
+     *       - in: path
+     *         name: idList
+     *         schema:
+     *           type: string
+     *         required: true
+     *     requestBody:
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             example:
+     *               idActivity: idActivity
+     *             required:
+     *               - idActivity
+     *             properties:
+     *               idActivity:
+     *                 type: string
+     *     responses:
+     *       $ref: '#/components/responses/baseResponse'
+     */
+    @Patch('/:idList')
+    @PublicRoute()
+    @Middlewares(AuthValidator.accessPermission, RelationValidator.onlyId)
+    public async removeActivityFromSpecificList(req: Request, res: Response): Promise<void> {
+        const list = await new ListRepository().findById(req.params.idList);
+        if (list) {
+            const activities = new ListRepository().filterActivitiesById(list, req.body.idActivity);
+            list.activities = activities;
+            await new ListRepository().update(list);
+            RouteResponse.successEmpty(res);
+        }
+        RouteResponse.error("Can't remove activity of this list", res);
+    }
+
+    /**
+     * @swagger
      * /v1/relation/{id}:
      *   delete:
      *     summary: Apaga uma atividade de todas as listas
@@ -89,8 +136,9 @@ export class RelationController extends BaseController {
     @Delete('/:id')
     @PublicRoute()
     @Middlewares(AuthValidator.accessPermission, RelationValidator.validatorActivity())
-    public async remove(req: Request, res: Response): Promise<void> {
-        await new ListRepository().deleteActivitiesFromLists(req.params.id);
+    public async removeActivityFromAllLists(req: Request, res: Response): Promise<void> {
+        const lists = await new ListRepository().findListsWithActivityId(req.params.id);
+        new ListRepository().deleteActivityFromLists(lists, req.params.id);
         RouteResponse.successEmpty(res);
     }
 }
