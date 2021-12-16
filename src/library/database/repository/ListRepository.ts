@@ -98,16 +98,16 @@ export class ListRepository extends BaseRepository {
     }
 
     /**
-     * deleteActivitiesFromLists
+     * findListsWithActivityId
      *
-     * Deleta atividades da lista
+     * Retorna todas as listas que possuem determinada atividade
      *
      * @param id - ID da atividade
      *
-     * @returns Listas alteradas
+     * @returns Listas encontradas
      */
-    public async deleteActivitiesFromLists(id: string): Promise<List[]> {
-        const lists = await this.getConnection()
+    public async findListsWithActivityId(id: string): Promise<List[]> {
+        return this.getConnection()
             .getRepository(List)
             .find({
                 where: {
@@ -115,17 +115,40 @@ export class ListRepository extends BaseRepository {
                     'activities.id': { $eq: id }
                 }
             });
-        lists.forEach(list => {
-            const item = list.activities.filter(activity => activity.id !== id);
-            const upList = new List();
-            upList.id = list.id;
-            upList.activities = item;
-            upList.familyMemberName = list.familyMemberName;
-            upList.status = list.status;
-            this.update(upList);
-            return upList;
-        });
+    }
 
+    /**
+     * deleteActivityFromLists
+     *
+     * Deleta uma atividade de todas as listas passadas
+     *
+     * @param lists - Lista de membros relacionadas com atividades
+     * @param id - ID da atividade
+     *
+     * @returns Lista com todos os membros com exclusão da atividade passada.
+     */
+    public deleteActivityFromLists(lists: List[], id: string): List[] {
+        lists.forEach(list => {
+            const activities = this.filterActivitiesById(list, id);
+            const updateList = list;
+            updateList.activities = activities;
+            this.update(updateList);
+            return updateList;
+        });
         return lists;
+    }
+
+    /**
+     * filterActivitiesById
+     *
+     * Filtra uma lista de atividades removendo atividades que possuam o id informado
+     *
+     * @param list - Lista do membro com atividades
+     * @param id - ID da atividade para remover
+     *
+     * @returns lista de atividades
+     */
+    public filterActivitiesById(list: List, id: string): IActivityValue[] {
+        return list.activities.filter(activity => activity.id !== id);
     }
 }
