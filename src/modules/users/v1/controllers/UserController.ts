@@ -147,9 +147,9 @@ export class UserController extends BaseController {
             const user = await userRepository.findByEmail(email);
             if (user) {
                 await new UserRepository().delete(user.id);
-                RouteResponse.success('Usuário deletado.', res);
+                RouteResponse.successEmpty(res);
             }
         }
-        RouteResponse.error('Erro ao deletar, dados inválidos.', res);
+        RouteResponse.error('Invalid data, error deleting user', res);
     }
 }

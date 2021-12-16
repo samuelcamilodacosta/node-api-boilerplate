@@ -6,7 +6,7 @@ import { Request, Response } from 'express';
 import { BaseController } from '../../../../library';
 
 // Decorators
-import { Controller, Delete, Middlewares, Post, PublicRoute, Get } from '../../../../decorators';
+import { Controller, Delete, Middlewares, Post, PublicRoute, Get, Patch } from '../../../../decorators';
 
 // Models
 import { EnumEndpoints } from '../../../../models';
@@ -126,6 +126,42 @@ export class ListController extends BaseController {
         await new ListRepository().insert(newList);
 
         RouteResponse.successCreate(res);
+    }
+
+    /**
+     * @swagger
+     * /v1/list/{id}:
+     *   patch:
+     *     summary: Atualiza status de uma lista
+     *     tags: [List]
+     *     consumes:
+     *       - application/json
+     *     produces:
+     *       - application/json
+     *     security:
+     *       - BearerAuth: []
+     *     parameters:
+     *       - in: path
+     *         name: id
+     *         schema:
+     *           type: string
+     *         required: true
+     *     responses:
+     *       $ref: '#/components/responses/baseResponse'
+     */
+    @Patch('/:id')
+    @PublicRoute()
+    @Middlewares(AuthValidator.accessPermission, ListValidator.onlyId())
+    public async changeStatusList(req: Request, res: Response): Promise<void> {
+        const list = await new ListRepository().findById(req.params.id);
+
+        if (list) {
+            list.status = req.body.status;
+            await new ListRepository().update(list);
+
+            RouteResponse.success(list, res);
+        }
+        RouteResponse.error('Failed to patch list', res);
     }
 
     /**
