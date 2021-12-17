@@ -91,8 +91,7 @@ export class ListRepository extends BaseRepository {
             activity.id = idActivity;
             if (!list.activities) list.activities = new Array(activity);
             else list.activities.push(activity);
-            await new ListRepository().delete(id);
-            return this.getConnection().getRepository(List).save(list);
+            return this.update(list);
         }
         return undefined;
     }
@@ -153,22 +152,82 @@ export class ListRepository extends BaseRepository {
     }
 
     /**
-     * findClosedMemberList
+     * findLists
      *
-     * Retorna todas as listas do membro informado encerradas
+     * Retorna todas as listas do membro de acordo com os parametros de busca
      *
-     * @param name - family member name searched
+     * @param name - nome do membro da família procurado
+     * @param status - status procurado
      *
      * @returns Listas encontradas
      */
-    public async findClosedMemberList(name: string): Promise<List[]> {
+    public async findLists(name: string, status: string): Promise<List[]> {
         return this.getConnection()
             .getRepository(List)
             .find({
                 where: {
-                    status: { $eq: 'Encerrada' },
+                    status: { $eq: status },
                     familyMemberName: { $eq: name }
                 }
             });
+    }
+
+    /**
+     * findDiscount
+     *
+     * Soma os valores das atividades que são negativos, totalizando o desconto na lista
+     *
+     * @param list - Lista do membro com atividades
+     *
+     * @returns Valor do desconto
+     */
+    public findDiscount(list: List): number {
+        let discount = 0;
+        list.activities.forEach(activity => {
+            if (activity.value < 0) discount += activity.value;
+        });
+        return discount;
+    }
+
+    public totalDiscount(lists: List[]): number {
+        let totalDiscount = 0;
+        lists.forEach(list => {
+            totalDiscount += this.findDiscount(list);
+        });
+        return totalDiscount;
+    }
+
+    /**
+     * countFailedActivities
+     *
+     * Conta quantas atividades na lista possuem valores negativos
+     *
+     * @param list - Lista do membro com atividades
+     *
+     * @returns Quantidade de atividades falhadas
+     */
+    public countFailedActivities(list: List): number {
+        let failed = 0;
+        list.activities.forEach(activity => {
+            if (activity.value < 0) failed += 1;
+        });
+        return failed;
+    }
+
+    /**
+     * arrayCountFailedActivitiesInList
+     *
+     * Adiciona o valor total de atividades falhadas por lista em um array
+     *
+     * @param lists - Listas do membro da família
+     *
+     * @returns Array contendo o total de atividades falhadas em cada lista
+     */
+    public arrayCountFailedActivitiesInList(lists: List[]): number[] {
+        const array: number[] = [];
+        lists.forEach(list => {
+            array.push(new ListRepository().countFailedActivities(list));
+        });
+        return array;
     }
 }
