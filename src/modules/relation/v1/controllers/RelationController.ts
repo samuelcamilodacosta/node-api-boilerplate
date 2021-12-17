@@ -101,7 +101,7 @@ export class RelationController extends BaseController {
      */
     @Patch('/:idList')
     @PublicRoute()
-    @Middlewares(AuthValidator.accessPermission, RelationValidator.onlyId)
+    @Middlewares(AuthValidator.accessPermission, RelationValidator.validatorActivity())
     public async removeActivityFromSpecificList(req: Request, res: Response): Promise<void> {
         const list = await new ListRepository().findById(req.params.idList);
 
@@ -113,8 +113,6 @@ export class RelationController extends BaseController {
 
             RouteResponse.successEmpty(res);
         }
-
-        RouteResponse.error("Can't remove activity of this list", res);
     }
 
     /**

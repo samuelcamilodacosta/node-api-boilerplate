@@ -15,13 +15,13 @@ import { List, Activity } from '../../../../library/database/entity';
 /**
  * RelationValidator
  *
- * Classe de validadores para o endpoint da lista
+ * Classe de validadores para o endpoint da relation
  */
 export class RelationValidator extends BaseValidator {
     /**
      * model
      *
-     * Schema para validação no controller de listagem
+     * Schema para validação no controller de relation
      */
     private static model: Schema = {
         id: {
