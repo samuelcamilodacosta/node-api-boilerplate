@@ -1,9 +1,8 @@
 // Modules
 import { DeepPartial, DeleteResult, ObjectID, Repository } from 'typeorm';
-import bcrypt from 'bcryptjs';
 
-// JWT
-import jwt from 'jsonwebtoken';
+// Utils
+import { BcryptUtils, TokenUtils } from '../../../utils';
 
 // Entities
 import { User } from '../entity';
@@ -101,9 +100,9 @@ export class UserRepository extends BaseRepository {
     public async authenticateUser(email: string, password: string): Promise<string | null> {
         const user: User | undefined = await new UserRepository().findByEmail(email);
         if (user) {
-            const isValidPassword = await bcrypt.compare(password, user.password);
+            const isValidPassword = await BcryptUtils.compare(password, user.password);
             if (isValidPassword) {
-                const token = jwt.sign({ id: user.id, email: user.email }, 'secret', { expiresIn: '10h' });
+                const token = TokenUtils.sign(user.id, user.email);
                 return token;
             }
         }

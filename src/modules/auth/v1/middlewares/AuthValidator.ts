@@ -1,7 +1,8 @@
+// Libraries
 import { RequestHandler, Request, Response, NextFunction } from 'express';
 
-// JWT
-import jwt from 'jsonwebtoken';
+// Utils
+import { TokenUtils } from '../../../../utils';
 
 // Validators
 import { UserValidator } from '../../../users/v1/middlewares/UserValidator';
@@ -32,7 +33,7 @@ export class AuthValidator extends BaseValidator {
         if (authorization) {
             try {
                 const token = authorization.replace('Bearer', '').trim();
-                const data = jwt.verify(token, 'secret');
+                const data = TokenUtils.verify(token);
                 const { email } = data as ITokenPayload;
                 req.userEmail = email;
                 next();
@@ -53,7 +54,7 @@ export class AuthValidator extends BaseValidator {
         const { authorization } = req.headers;
         if (authorization) {
             const token = authorization.replace('Bearer', '').trim();
-            const data = jwt.verify(token, 'secret');
+            const data = TokenUtils.verify(token);
             const { email } = data as ITokenPayload;
             req.userEmail = email;
             return email;
@@ -73,7 +74,7 @@ export class AuthValidator extends BaseValidator {
         if (!token || !email) RouteResponse.unauthorizedError(res);
         else {
             try {
-                jwt.verify(token, 'secret');
+                TokenUtils.verify(token);
                 const user = userRepository.findByEmail(email);
                 if (user === undefined) RouteResponse.unauthorizedError(res);
                 next();
