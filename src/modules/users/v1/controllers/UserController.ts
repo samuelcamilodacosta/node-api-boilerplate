@@ -123,7 +123,7 @@ export class UserController extends BaseController {
 
     /**
      * @swagger
-     * /v1/user/:
+     * /v1/user:
      *   delete:
      *     summary: Apaga um usuário (responsável)
      *     tags: [Users]
@@ -147,6 +147,7 @@ export class UserController extends BaseController {
             const user = await userRepository.findByEmail(email);
             if (user) {
                 await new UserRepository().delete(user.id);
+
                 RouteResponse.successEmpty(res);
             }
         }

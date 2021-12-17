@@ -151,4 +151,24 @@ export class ListRepository extends BaseRepository {
     public filterActivitiesById(list: List, id: string): IActivityValue[] {
         return list.activities.filter(activity => activity.id !== id);
     }
+
+    /**
+     * findClosedMemberList
+     *
+     * Retorna todas as listas do membro informado encerradas
+     *
+     * @param name - family member name searched
+     *
+     * @returns Listas encontradas
+     */
+    public async findClosedMemberList(name: string): Promise<List[]> {
+        return this.getConnection()
+            .getRepository(List)
+            .find({
+                where: {
+                    status: { $eq: 'Encerrada' },
+                    familyMemberName: { $eq: name }
+                }
+            });
+    }
 }

@@ -4,5 +4,6 @@ export enum EnumEndpoints {
     ACTIVITY = '/v1/activity',
     LIST = '/v1/list',
     MEMBER = '/v1/member',
-    RELATION = '/v1/relation'
+    RELATION = '/v1/relation',
+    HISTORIC = '/v1/historic'
 }
