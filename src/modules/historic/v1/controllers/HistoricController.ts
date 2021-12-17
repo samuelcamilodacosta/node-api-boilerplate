@@ -20,10 +20,10 @@ import { AuthValidator } from '../../../auth/v1';
 export class HistoricController extends BaseController {
     /**
      * @swagger
-     * /v1/historic/{name}:
+     * /v1/historic/{name}/closed:
      *   get:
      *     summary: Histórico das listas arquivadas e valor da mesada do membro
-     *     tags: [Historic]
+     *     tags: [List History]
      *     consumes:
      *       - application/json
      *     produces:
@@ -39,13 +39,46 @@ export class HistoricController extends BaseController {
      *     responses:
      *       $ref: '#/components/responses/baseResponse'
      */
-    @Get('/:name')
+    @Get('/:name/closed')
     @PublicRoute()
     @Middlewares(AuthValidator.accessPermission)
-    public async historic(req: Request, res: Response): Promise<void> {
-        const lists = await new ListRepository().findClosedMemberList(req.params.name);
+    public async listsClosedAndFailedActivities(req: Request, res: Response): Promise<void> {
+        const lists = await new ListRepository().findLists(req.params.name, 'Encerrada');
+
+        const totalFailedActivities = new ListRepository().arrayCountFailedActivitiesInList(lists);
+
+        RouteResponse.success({ lists, totalFailedActivities }, res);
+    }
+
+    /**
+     * @swagger
+     * /v1/historic/{name}/inprogress:
+     *   get:
+     *     summary: Histórico das listas em andamento
+     *     tags: [List History]
+     *     consumes:
+     *       - application/json
+     *     produces:
+     *       - application/json
+     *     security:
+     *       - BearerAuth: []
+     *     parameters:
+     *       - in: path
+     *         name: name
+     *         schema:
+     *           type: string
+     *         required: true
+     *     responses:
+     *       $ref: '#/components/responses/baseResponse'
+     */
+    @Get('/:name/inprogress')
+    @PublicRoute()
+    @Middlewares(AuthValidator.accessPermission)
+    public async listsInProgress(req: Request, res: Response): Promise<void> {
+        const lists = await new ListRepository().findLists(req.params.name, 'Em andamento');
         const member = await new MemberRepository().findByName(req.params.name);
+        const totalDiscount = new ListRepository().totalDiscount(lists);
         const allowanceValue = member?.allowanceValue;
-        RouteResponse.success({ lists, allowanceValue }, res);
+        RouteResponse.success({ lists, totalDiscount, allowanceValue }, res);
     }
 }
