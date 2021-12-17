@@ -124,4 +124,13 @@ export class ListValidator extends BaseValidator {
     public static onlyId(): RequestHandler[] {
         return BaseValidator.validationList({ id: ListValidator.model.id });
     }
+
+    /**
+     * patch
+     *
+     * @returns Lista de validadores
+     */
+    public static patch(): RequestHandler[] {
+        return ListValidator.validationList({ id: ListValidator.model.id, status: ListValidator.model.status });
+    }
 }

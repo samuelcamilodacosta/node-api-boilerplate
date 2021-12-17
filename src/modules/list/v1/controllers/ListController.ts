@@ -163,7 +163,7 @@ export class ListController extends BaseController {
      */
     @Patch('/:id')
     @PublicRoute()
-    @Middlewares(AuthValidator.accessPermission, ListValidator.onlyId())
+    @Middlewares(AuthValidator.accessPermission, ListValidator.patch())
     public async changeStatusList(req: Request, res: Response): Promise<void> {
         const list = await new ListRepository().findById(req.params.id);
 
