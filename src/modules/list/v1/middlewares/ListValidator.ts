@@ -21,7 +21,7 @@ export class ListValidator extends BaseValidator {
     /**
      * model
      *
-     * Schema para validação no controller de listagem
+     * Schema para validação no controller de lista
      */
     private static model: Schema = {
         id: {

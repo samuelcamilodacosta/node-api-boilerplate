@@ -15,7 +15,7 @@ import { List, Activity } from '../../../../library/database/entity';
 /**
  * RelationValidator
  *
- * Classe de validadores para o endpoint da relation
+ * Classe de validadores para o endpoint de relation
  */
 export class RelationValidator extends BaseValidator {
     /**

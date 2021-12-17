@@ -20,7 +20,7 @@ export class MemberValidator extends BaseValidator {
     /**
      * model
      *
-     * Schema para validação no controller de membros
+     * Schema para validação no controller de membros da família
      */
     private static model: Schema = {
         id: {

@@ -20,7 +20,7 @@ export class ActivityValidator extends BaseValidator {
     /**
      * model
      *
-     * Schema para validação no controller de usuários
+     * Schema para validação no controller de atividades
      */
     private static model: Schema = {
         id: {
