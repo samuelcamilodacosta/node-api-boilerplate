@@ -117,7 +117,7 @@ export class RelationController extends BaseController {
 
     /**
      * @swagger
-     * /v1/relation/{id}:
+     * /v1/relation/{idActivity}:
      *   delete:
      *     summary: Apaga uma atividade de todas as listas
      *     tags: [List Activity]
@@ -129,20 +129,20 @@ export class RelationController extends BaseController {
      *       - BearerAuth: []
      *     parameters:
      *       - in: path
-     *         name: id
+     *         name: idActivity
      *         schema:
      *           type: string
      *         required: true
      *     responses:
      *       $ref: '#/components/responses/baseResponse'
      */
-    @Delete('/:id')
+    @Delete('/:idActivity')
     @PublicRoute()
     @Middlewares(AuthValidator.accessPermission, RelationValidator.validatorActivity())
     public async removeActivityFromAllLists(req: Request, res: Response): Promise<void> {
-        const lists = await new ListRepository().findListsWithActivityId(req.params.id);
+        const lists = await new ListRepository().findListsWithActivityId(req.params.idActivity);
 
-        new ListRepository().deleteActivityFromLists(lists, req.params.id);
+        new ListRepository().deleteActivityFromLists(lists, req.params.idActivity);
 
         RouteResponse.successEmpty(res);
     }
