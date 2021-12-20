@@ -1,5 +1,8 @@
 // Modules
-import { DeepPartial, DeleteResult, Repository } from 'typeorm';
+import { DeepPartial, DeleteResult, ObjectID, Repository } from 'typeorm';
+
+// Utils
+import { BcryptUtils, TokenUtils } from '../../../utils';
 
 // Entities
 import { User } from '../entity';
@@ -33,7 +36,7 @@ export class UserRepository extends BaseRepository {
     }
 
     /**
-     * insert
+     * update
      *
      * Altera um usuário
      *
@@ -54,20 +57,55 @@ export class UserRepository extends BaseRepository {
      *
      * @returns Resultado da remoção
      */
-    public delete(id: string): Promise<DeleteResult> {
+    public delete(id: ObjectID): Promise<DeleteResult> {
         return this.getConnection().getRepository(User).delete(id);
     }
 
     /**
-     * findByName
+     * findByEmail
      *
-     * Busca um usuário pelo nome
+     * Busca um usuário pelo email
      *
-     * @param name - Nome do usuário
+     * @param email - E-mail do usuário
      *
      * @returns Usuário buscado
      */
-    public findByName(name: string): Promise<User | undefined> {
-        return this.getConnection().getRepository(User).findOne({ name });
+    public findByEmail(email: string): Promise<User | undefined> {
+        return this.getConnection().getRepository(User).findOne({ email });
+    }
+
+    /**
+     * findById
+     *
+     * Busca um usuário pelo ID
+     *
+     * @param id - ID do usuário
+     *
+     * @returns Usuário buscado
+     */
+    public findById(id: ObjectID): Promise<User | undefined> {
+        return this.getConnection().getRepository(User).findOne(id);
+    }
+
+    /**
+     * authenticateUser
+     *
+     * Gera um token de autenticação parao  usuário
+     *
+     * @param email - Email do usuário
+     * @param password - Senha do usuário
+     *
+     * @returns token
+     */
+    public async authenticateUser(email: string, password: string): Promise<string | null> {
+        const user: User | undefined = await new UserRepository().findByEmail(email);
+        if (user) {
+            const isValidPassword = await BcryptUtils.compare(password, user.password);
+            if (isValidPassword) {
+                const token = TokenUtils.sign(user.id, user.email);
+                return token;
+            }
+        }
+        return null;
     }
 }
