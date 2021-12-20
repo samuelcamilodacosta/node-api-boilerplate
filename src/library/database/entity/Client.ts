@@ -1,12 +1,21 @@
 import { Entity, ObjectID, ObjectIdColumn, Column, BeforeInsert, BeforeUpdate, BaseEntity } from 'typeorm';
 
 @Entity()
-export class User extends BaseEntity {
+export class Client extends BaseEntity {
     @ObjectIdColumn() // Alterar para @PrimaryGeneratedColumn em caso de banco diferente do MongoDB
     public id: ObjectID;
 
-    @Column({ unique: true })
+    @Column()
     public name: string;
+
+    @Column({ unique: true })
+    public email: string;
+
+    @Column()
+    public phone: string;
+
+    @Column()
+    public status: boolean;
 
     @Column()
     public createdAt: Date;
