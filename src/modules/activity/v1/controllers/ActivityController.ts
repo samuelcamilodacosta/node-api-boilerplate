@@ -154,6 +154,7 @@ export class ActivityController extends BaseController {
     @Middlewares(AuthValidator.accessPermission, ActivityValidator.put())
     public async updateActivity(req: Request, res: Response): Promise<void> {
         const activity: Activity = req.body.activityRef;
+        activity.id = req.body.id;
         activity.description = req.body.description;
 
         await new ActivityRepository().update(activity);

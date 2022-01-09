@@ -1,12 +1,12 @@
 // Modules
 import { DeepPartial, DeleteResult, Repository } from 'typeorm';
+import { ListRepository } from '.';
 
 // Entities
 import { Activity } from '../entity';
 
 // Repositories
 import { BaseRepository } from './BaseRepository';
-import { ListRepository } from './ListRepository';
 
 /**
  * AcitivityRepository
@@ -45,8 +45,10 @@ export class ActivityRepository extends BaseRepository {
      *
      * @returns Atividade alterada
      */
-    public update(activity: Activity): Promise<Activity> {
-        new ListRepository().deleteActivitiesFromLists(activity.id.toString());
+    public async update(activity: Activity): Promise<Activity> {
+        const lists = await new ListRepository().findListsWithActivityId(activity.id);
+        new ListRepository().deleteActivityFromLists(lists, activity.id);
+        this.getConnection().getRepository(Activity).delete(activity.id);
         return this.getConnection().getRepository(Activity).save(activity);
     }
 

@@ -35,12 +35,17 @@ export class UserValidator extends BaseValidator {
         password: {
             in: 'body',
             isString: true,
-            isLength: {
+            isStrongPassword: {
                 options: {
-                    min: 6
+                    minLength: 8,
+                    minLowercase: 1,
+                    minUppercase: 1,
+                    minNumbers: 1,
+                    minSymbols: 1
                 }
             },
-            errorMessage: 'Senha muito curta.'
+            errorMessage:
+                'Senha muito fraca. A senha deve conter pelo menos 8 caracteres, uma letra maiúscula, uma minúscula, um número e um caractere especial.'
         },
         duplicate: {
             errorMessage: 'E-mail já se encontra em uso.',

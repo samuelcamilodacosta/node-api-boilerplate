@@ -105,7 +105,7 @@ export class ListRepository extends BaseRepository {
      *
      * @returns Listas encontradas
      */
-    public async findListsWithActivityId(id: string): Promise<List[]> {
+    public async findListsWithActivityId(id: string | ObjectID): Promise<List[]> {
         return this.getConnection()
             .getRepository(List)
             .find({
@@ -126,7 +126,7 @@ export class ListRepository extends BaseRepository {
      *
      * @returns Lista com todos os membros com exclusão da atividade passada.
      */
-    public deleteActivityFromLists(lists: List[], id: string): List[] {
+    public deleteActivityFromLists(lists: List[], id: string | ObjectID): List[] {
         lists.forEach(list => {
             const activities = this.filterActivitiesById(list, id);
             const updateList = list;
@@ -147,7 +147,7 @@ export class ListRepository extends BaseRepository {
      *
      * @returns lista de atividades
      */
-    public filterActivitiesById(list: List, id: string): IActivityValue[] {
+    public filterActivitiesById(list: List, id: string | ObjectID): IActivityValue[] {
         return list.activities.filter(activity => activity.id !== id);
     }
 
