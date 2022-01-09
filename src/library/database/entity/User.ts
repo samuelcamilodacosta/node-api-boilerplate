@@ -1,12 +1,22 @@
-import { Entity, ObjectID, ObjectIdColumn, Column, BeforeInsert, BeforeUpdate, BaseEntity } from 'typeorm';
+import { Entity, Column, BaseEntity, BeforeUpdate, BeforeInsert, ObjectIdColumn, ObjectID } from 'typeorm';
+import { BcryptUtils } from '../../../utils';
 
 @Entity()
 export class User extends BaseEntity {
-    @ObjectIdColumn() // Alterar para @PrimaryGeneratedColumn em caso de banco diferente do MongoDB
+    @ObjectIdColumn()
     public id: ObjectID;
 
     @Column({ unique: true })
-    public name: string;
+    public email: string;
+
+    @Column()
+    public password: string;
+
+    @BeforeInsert()
+    @BeforeUpdate()
+    hashPassword(): void {
+        this.password = BcryptUtils.hashSync(this.password);
+    }
 
     @Column()
     public createdAt: Date;

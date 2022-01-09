@@ -22,21 +22,40 @@ export class UserValidator extends BaseValidator {
      *
      * Schema para validação no controller de usuários
      */
-    private static model: Schema = {
-        name: BaseValidator.validators.name,
+    public static model: Schema = {
         id: {
             ...BaseValidator.validators.id(new UserRepository()),
             errorMessage: 'Usuário não encontrado'
         },
+        email: {
+            in: 'body',
+            isEmail: true,
+            errorMessage: 'E-mail inválido'
+        },
+        password: {
+            in: 'body',
+            isString: true,
+            isStrongPassword: {
+                options: {
+                    minLength: 8,
+                    minLowercase: 1,
+                    minUppercase: 1,
+                    minNumbers: 1,
+                    minSymbols: 1
+                }
+            },
+            errorMessage:
+                'Senha muito fraca. A senha deve conter pelo menos 8 caracteres, uma letra maiúscula, uma minúscula, um número e um caractere especial.'
+        },
         duplicate: {
-            errorMessage: 'Usuário já existe',
+            errorMessage: 'E-mail já se encontra em uso.',
             custom: {
                 options: async (_: string, { req }) => {
                     let check = false;
 
-                    if (req.body.name) {
+                    if (req.body.email) {
                         const userRepository: UserRepository = new UserRepository();
-                        const user: User | undefined = await userRepository.findByName(req.body.name);
+                        const user: User | undefined = await userRepository.findByEmail(req.body.email);
 
                         check = user ? req.body.id === user.id.toString() : true;
                     }
@@ -53,10 +72,7 @@ export class UserValidator extends BaseValidator {
      * @returns Lista de validadores
      */
     public static post(): RequestHandler[] {
-        return UserValidator.validationList({
-            name: UserValidator.model.name,
-            duplicate: UserValidator.model.duplicate
-        });
+        return UserValidator.validationList({ ...UserValidator.model });
     }
 
     /**
@@ -67,7 +83,7 @@ export class UserValidator extends BaseValidator {
     public static put(): RequestHandler[] {
         return UserValidator.validationList({
             id: UserValidator.model.id,
-            ...UserValidator.model
+            password: UserValidator.model.password
         });
     }
 

@@ -26,7 +26,7 @@ export class BaseValidator {
         id: (repository: BaseRepository): ParamSchema => {
             return {
                 in: ['body', 'params'],
-                isMongoId: true, // Não usar em caso de banco diferente do MongoDB
+                // isMongoId: true, Não usar em caso de banco diferente do MongoDB
                 custom: {
                     options: async (value: string, { req }: Meta) => {
                         const data = await repository.findOne(value);
@@ -41,25 +41,6 @@ export class BaseValidator {
                 },
                 errorMessage: 'ID não encontrado'
             };
-        },
-        name: {
-            in: 'body',
-            isString: true,
-            isLength: {
-                options: {
-                    min: 3
-                }
-            },
-            customSanitizer: {
-                options: (value: string) => {
-                    if (typeof value === 'string') {
-                        return StringUtils.firstUpperCase(value);
-                    }
-
-                    return undefined;
-                }
-            },
-            errorMessage: 'Nome inválido'
         }
     };
 

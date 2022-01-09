@@ -6,7 +6,7 @@ import { Request, Response } from 'express';
 import { BaseController } from '../../../../library';
 
 // Decorators
-import { Controller, Delete, Get, Middlewares, Post, PublicRoute, Put } from '../../../../decorators';
+import { Controller, Delete, Middlewares, Patch, Post, PublicRoute } from '../../../../decorators';
 
 // Models
 import { EnumEndpoints } from '../../../../models';
@@ -22,66 +22,15 @@ import { UserRepository } from '../../../../library/database/repository';
 
 // Validators
 import { UserValidator } from '../middlewares/UserValidator';
+import { AuthValidator } from '../../../auth/v1';
 
 @Controller(EnumEndpoints.USER_V1)
 export class UserController extends BaseController {
     /**
      * @swagger
      * /v1/user:
-     *   get:
-     *     summary: Lista os usuários
-     *     tags: [Users]
-     *     consumes:
-     *       - application/json
-     *     produces:
-     *       - application/json
-     *     parameters:
-     *       - $ref: '#/components/parameters/listPageRef'
-     *       - $ref: '#/components/parameters/listSizeRef'
-     *       - $ref: '#/components/parameters/listOrderRef'
-     *       - $ref: '#/components/parameters/listOrderByRef'
-     *     responses:
-     *       $ref: '#/components/responses/baseResponse'
-     */
-    @Get()
-    @PublicRoute()
-    public async get(req: Request, res: Response): Promise<void> {
-        const [rows, count] = await new UserRepository().list<User>(UserController.listParams(req));
-
-        RouteResponse.success({ rows, count }, res);
-    }
-
-    /**
-     * @swagger
-     * /v1/user/{userId}:
-     *   get:
-     *     summary: Retorna informações de um usuário
-     *     tags: [Users]
-     *     consumes:
-     *       - application/json
-     *     produces:
-     *       - application/json
-     *     parameters:
-     *       - in: path
-     *         name: userId
-     *         schema:
-     *           type: string
-     *         required: true
-     *     responses:
-     *       $ref: '#/components/responses/baseResponse'
-     */
-    @Get('/:id')
-    @PublicRoute()
-    @Middlewares(UserValidator.onlyId())
-    public async getOne(req: Request, res: Response): Promise<void> {
-        RouteResponse.success({ ...req.body.userRef }, res);
-    }
-
-    /**
-     * @swagger
-     * /v1/user:
      *   post:
-     *     summary: Cadastra um usuário
+     *     summary: Cadastra um usuário (responsável).
      *     tags: [Users]
      *     consumes:
      *       - application/json
@@ -93,11 +42,15 @@ export class UserController extends BaseController {
      *           schema:
      *             type: object
      *             example:
-     *               name: userName
+     *               email: me@mail.com
+     *               password: yourPassword
      *             required:
-     *               - name
+     *               - email
+     *               - password
      *             properties:
-     *               name:
+     *               email:
+     *                 type: string
+     *               password:
      *                 type: string
      *     responses:
      *       $ref: '#/components/responses/baseCreate'
@@ -105,9 +58,10 @@ export class UserController extends BaseController {
     @Post()
     @PublicRoute()
     @Middlewares(UserValidator.post())
-    public async add(req: Request, res: Response): Promise<void> {
+    public async createUser(req: Request, res: Response): Promise<void> {
         const newUser: DeepPartial<User> = {
-            name: req.body.name
+            email: req.body.email,
+            password: req.body.password
         };
 
         await new UserRepository().insert(newUser);
@@ -118,72 +72,85 @@ export class UserController extends BaseController {
     /**
      * @swagger
      * /v1/user:
-     *   put:
-     *     summary: Altera um usuário
+     *   patch:
+     *     summary: Cadastrar nova senha (responsável)
      *     tags: [Users]
      *     consumes:
      *       - application/json
      *     produces:
      *       - application/json
+     *     security:
+     *       - BearerAuth: []
      *     requestBody:
      *       content:
      *         application/json:
      *           schema:
      *             type: object
      *             example:
-     *               id: userId
-     *               name: userName
+     *               password: newPassword
      *             required:
-     *               - id
-     *               - name
+     *               - password
      *             properties:
      *               id:
      *                 type: string
-     *               name:
+     *               email:
+     *                 type: string
+     *               password:
      *                 type: string
      *     responses:
      *       $ref: '#/components/responses/baseEmpty'
      */
-    @Put()
+    @Patch()
     @PublicRoute()
-    @Middlewares(UserValidator.put())
-    public async update(req: Request, res: Response): Promise<void> {
-        const user: User = req.body.userRef;
+    @Middlewares(AuthValidator.accessPermission, UserValidator.put())
+    public async registerNewPassword(req: Request, res: Response): Promise<void> {
+        const newUser: User = new User();
+        const email = AuthValidator.decodeTokenEmail(req, res);
+        const userRepository: UserRepository = new UserRepository();
 
-        user.name = req.body.name;
+        if (email) {
+            const user = await userRepository.findByEmail(email);
 
-        await new UserRepository().update(user);
+            if (user) newUser.id = user.id;
+            newUser.email = email;
+            newUser.password = req.body.password;
 
-        RouteResponse.successEmpty(res);
+            await new UserRepository().update(newUser);
+
+            RouteResponse.successEmpty(res);
+        }
     }
 
     /**
      * @swagger
-     * /v1/user/{userId}:
+     * /v1/user:
      *   delete:
-     *     summary: Apaga um usuário definitivamente
+     *     summary: Apaga um usuário (responsável)
      *     tags: [Users]
      *     consumes:
      *       - application/json
      *     produces:
      *       - application/json
-     *     parameters:
-     *       - in: path
-     *         name: userId
-     *         schema:
-     *           type: string
-     *         required: true
+     *     security:
+     *       - BearerAuth: []
      *     responses:
      *       $ref: '#/components/responses/baseResponse'
      */
-    @Delete('/:id')
+    @Delete()
     @PublicRoute()
-    @Middlewares(UserValidator.onlyId())
-    public async remove(req: Request, res: Response): Promise<void> {
-        const { id } = req.params;
+    @Middlewares(AuthValidator.accessPermission, UserValidator.onlyId())
+    public async deleteUser(req: Request, res: Response): Promise<void> {
+        const email = AuthValidator.decodeTokenEmail(req, res);
+        const userRepository: UserRepository = new UserRepository();
 
-        await new UserRepository().delete(id);
+        if (email) {
+            const user = await userRepository.findByEmail(email);
+            if (user) {
+                await new UserRepository().delete(user.id);
 
-        RouteResponse.success({ id }, res);
+                RouteResponse.successEmpty(res);
+            }
+        }
+        RouteResponse.error('Invalid data, error deleting user', res);
     }
 }
